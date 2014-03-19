@@ -1,4 +1,4 @@
-Laravel-Shibboleth-Service-Provider
+Laravel Shibboleth Service Provider
 ===================================
 
 Shibboleth Authentication for Laravel
@@ -15,6 +15,16 @@ Include the following line to the end of your /app/config/app.php  'providers ar
 
 <pre><code>'Saitswebuwm\Shibboleth\ShibbolethServiceProvider'</code></pre>
 
-You will also want to run the following commands to override config changes outside of the package.
+You will also need to change your auth driver in /app/config/auth.php
 
-<pre><code>php artisan config:publish saitswebuwm/shibboleth</code></pre>
+<pre><code>'driver' => 'shibboleth',</code></pre>
+
+Add the included .htaccess file to your public folder. This should work for everyone. If users must authenticate with shibboleth you will have to modify this as it's set up to allow for both shibboleth and non-shibboleth users by default.
+
+Now we can set it up for your install. Run the following two commands to created the needed database tables and config file.
+
+<pre><code>php artisan config:publish saitswebuwm/shibboleth
+php artisan migrate --package="saitswebuwm/shibboleth"</code></pre>
+
+Config Overview
+===============
