@@ -51,4 +51,16 @@ return array(
 	'idp_login_email' => 'mail', //idp server variable for email address
 	'idp_login_first' => 'givenName', //idp server variable for first name
 	'idp_login_last' => 'sn', //idp server variable for last name
+
+	/*
+	|--------------------------------------------------------------------------
+	| Groups Settings
+	|--------------------------------------------------------------------------
+	|
+	| Change the group setting acording to your database and program requirements.
+	|
+	*/
+
+	'shibboleth_group' => '1', // Default group ID shibboleth users will be added to
+
 );
