@@ -130,7 +130,7 @@ class ShibbolethController extends Controller {
                         'last_name' => $last_name,
                         'enabled' => 0
                     ));
-                $group = \Group::find(2);
+                $group = \Group::find(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_group'));
 
                 $group->users()->save($user);
 
