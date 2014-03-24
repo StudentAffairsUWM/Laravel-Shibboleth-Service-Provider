@@ -48,17 +48,17 @@ class ShibbolethController extends Controller {
 
         if (Auth::attempt(array('email' => $email, 'password' => $password), true))
         {
-            $user = \User::where('email', '=', $email)->first();
+            $user = UserShibboleth::where('email', '=', $email)->first();
             if (isset($user->first_name)) Session::put('first', $user->first_name);
             if (isset($user->last_name)) Session::put('last', $user->last_name);
             if (isset($email)) Session::put('email', $user->email);
-            if (isset($email)) Session::put('id', \User::where('email', '=', $email)->first()->id);
+            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id);
 
 
             //Group Session Field
             if (isset($email)){
                 try{
-                    $group = \Group::whereHas('users', function($q){
+                    $group = Group::whereHas('users', function($q){
                         $q->where('email', '=', Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_email')));
                     })->first();
 
@@ -100,12 +100,12 @@ class ShibbolethController extends Controller {
             if (isset($first_name)) Session::put('first', $first_name);
             if (isset($last_name)) Session::put('last', $last_name);
             if (isset($email)) Session::put('email', $email);
-            if (isset($email)) Session::put('id', \User::where('email', '=', $email)->first()->id);
+            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id);
 
             //Group Session Field
             if (isset($email)){
                 try{
-                    $group = \Group::whereHas('users', function($q){
+                    $group = Group::whereHas('users', function($q){
                         $q->where('email', '=', Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_email')));
                     })->first();
 
@@ -123,14 +123,14 @@ class ShibbolethController extends Controller {
         {
             //Add user to group and send through auth.
             if(isset($email)){
-                $user = \User::create(array(
+                $user = UserShibboleth::create(array(
                         'email' => $email,
                         'type' => 'shibboleth',
                         'first_name' => $first_name,
                         'last_name' => $last_name,
                         'enabled' => 0
                     ));
-                $group = \Group::find(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_group'));
+                $group = Group::find(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_group'));
 
                 $group->users()->save($user);
 

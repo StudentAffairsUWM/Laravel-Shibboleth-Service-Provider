@@ -19,7 +19,7 @@ return array(
     
     'idp_login' => 'your.idp.login',
     'idp_logout' => 'your.idp.logout',
-    'local_logout' => 'shibboleth::local',
+    'local_logout' => 'saitswebuwm/shibboleth::local',
     'login_fail' => '/unauthorized',
 
 	/*
@@ -32,10 +32,10 @@ return array(
 	|
 	*/
 
-    'login_view' => 'shibboleth::local', // View that local users should use to login
-    'shibboleth_view' => 'shibboleth::hello', // View shibboleth users see after authenticating
-    'default_view' => 'shibboleth::hello', // View users see after authenticating
-    'default_unauth' => 'shibboleth::unauthorized', // View users see when rejected
+    'login_view' => 'saitswebuwm/shibboleth::local', // View that local users should use to login
+    'shibboleth_view' => 'saitswebuwm/shibboleth::authorized', // View shibboleth users see after authenticating
+    'default_view' => 'saitswebuwm/shibboleth::authorized', // View users see after authenticating
+    'default_unauth' => 'saitswebuwm/shibboleth::unauthorized', // View users see when rejected
 
 	/*
 	|--------------------------------------------------------------------------
