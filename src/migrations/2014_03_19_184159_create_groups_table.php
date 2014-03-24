@@ -12,11 +12,13 @@ class CreateGroupsTable extends Migration {
 	 */
 	public function up()
 	{
-        Schema::create('groups', function(Blueprint $table)
+        	Schema::create('groups', function(Blueprint $table)
 		{
 			$table->increments('id');
-            $table->string('name', 12)->unique();
+            		$table->string('name', 12)->unique();
 		});
+		
+		DB::table('groups')->insert(array('name' => 'default'));
 	}
 
 	/**
