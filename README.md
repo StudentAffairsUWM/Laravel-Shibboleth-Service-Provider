@@ -17,7 +17,8 @@ Include the following line to the end of your /app/config/app.php  'providers ar
 
 You will also need to change your auth driver in /app/config/auth.php
 
-<pre><code>'driver' => 'shibboleth',</code></pre>
+<pre><code>'driver' => 'shibboleth'
+'model' => 'Saitswebuwm\Shibboleth\UserShibboleth'</code></pre>
 
 Add the included .htaccess file to your public folder. This should work for everyone. If users must authenticate with shibboleth you will have to modify this as it's set up to allow for both shibboleth and non-shibboleth users by default.
 
