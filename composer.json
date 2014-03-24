@@ -5,6 +5,10 @@
         {
             "name": "Christopher Maio",
             "email": "cjmaio@uwm.edu"
+        },
+        {
+            "name": "Michael Schuett",
+            "email": "mschuett@uwm.edu"
         }
     ],
     "require": {
@@ -14,7 +18,8 @@
     "autoload": {
         "classmap": [
             "src/migrations",
-            "src/controllers"
+            "src/controllers",
+            "src/models"
         ],
         "psr-0": {
             "Saitswebuwm\\Shibboleth\\": "src/"
