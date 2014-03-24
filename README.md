@@ -7,7 +7,7 @@ Include the follwoing in your composer.json file and run composer update or inst
 
 <pre><code>{
     "require": {
-        "saitswebuwm/shibboleth": "dev-master": "dev-master"
+        "saitswebuwm/shibboleth": "dev-master"
     }
 }</code></pre>
 
