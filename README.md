@@ -29,5 +29,4 @@ php artisan migrate --package="saitswebuwm/shibboleth"</code></pre>
 
 You will need to configure your .htaccess with whatever your setup involves. By default I have included a .htaccess in the src directory that will allow both shibboleth and non shibboleth users to view the application. Place it in your public folder if this behavior will work for your application.
 
-Config Overview
-===============
+For more info on the setup see the wiki section of this repository.
