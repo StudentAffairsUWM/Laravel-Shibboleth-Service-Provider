@@ -24,8 +24,6 @@ Alternatively instead of setting model it is recommended you add the following t
 
 <pre><code>protected $fillable = array('email', 'first_name', 'last_name', 'password', 'type');</code></pre>
 
-Add the included .htaccess file to your public folder. This should work for everyone. If users must authenticate with shibboleth you will have to modify this as it's set up to allow for both shibboleth and non-shibboleth users by default.
-
 Now we can set it up for your install. Run the following two commands to created the needed database tables and config file.
 
 <pre><code>php artisan config:publish saitswebuwm/shibboleth
