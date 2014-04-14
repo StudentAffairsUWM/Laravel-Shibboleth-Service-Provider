@@ -143,7 +143,7 @@ class ShibbolethController extends Controller {
 
     public function idp_landing()
     {
-        return View::make(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_view'));
+        return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_view'));
     }
     
     /**
