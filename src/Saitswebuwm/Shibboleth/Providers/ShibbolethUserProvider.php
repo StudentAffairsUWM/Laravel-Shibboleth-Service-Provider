@@ -88,4 +88,21 @@ class ShibbolethUserProvider implements UserProviderInterface
             return true;
         }
     }
+    
+        /**
+     * Update the "remember me" token for the given user in storage.
+     *
+     * @param  \Illuminate\Auth\UserInterface  $user
+     * @param  string  $token
+     * @return void
+     */
+    public function updateRememberToken(UserInterface $user, $token){/*Need to impliment*/}
+
+    /**
+     * Retrieve a user by the given credentials.
+     *
+     * @param  array  $credentials
+     * @return \Illuminate\Auth\UserInterface|null
+     */
+    public function retrieveByCredentials(array $credentials){/*Need to impliment*/}
 }
