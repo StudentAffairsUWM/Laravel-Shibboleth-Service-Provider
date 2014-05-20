@@ -20,9 +20,7 @@ class ShibbolethServiceProvider extends AuthServiceProvider {
      */
     public function boot()
     {   
-        $this->package('saitswebuwm/shibboleth', 'saitswebuwm/shibboleth');
-
-        $config = $this->app['config']->get('saitswebuwm/shibboleth::shibboleth');
+        $this->package('saitswebuwm/shibboleth');
 
         $this->app['auth']->extend('shibboleth', function($app) {
             return new Guard(new Providers\ShibbolethUserProvider($this->app['hash'], $this->app['config']['auth.model']), $app['session.store']);

@@ -11,10 +11,9 @@ use Illuminate\Routing\Controller;
 
 class ShibbolethController extends Controller {
 
-    /**
-     * User
-     */
-    protected $user;
+    //Config pathings
+    private $cpath = "shibboleth::shibboleth";
+    private $ctrpath = "Saitswebuwm\\Shibboleth\\ShibbolethController@";
     
     /**
      * Inject the user into this controller if present.
@@ -30,7 +29,7 @@ class ShibbolethController extends Controller {
      */
     public function create()
     {
-        return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login') . '?target=' . action('Saitswebuwm\Shibboleth\ShibbolethController@idpAuthorize'));
+        return Redirect::to( 'https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . Config::get("$this->cpath.idp_login") . '?target=' . action($this->ctrpath . "idpAuthorize"));
     }
     
     /**
@@ -38,13 +37,13 @@ class ShibbolethController extends Controller {
      */
     public function localCreate()
     {
-        return View::make(Config::get('saitswebuwm/shibboleth::shibboleth.login_view'));
+        return View::make(Config::get("$this->cpath.login_view"));
     }
     
     public function localAuthorize()
     {
-        $email = \Input::get(Config::get('saitswebuwm/shibboleth::shibboleth.local_login_user_field'));
-        $password = \Input::get(Config::get('saitswebuwm/shibboleth::shibboleth.local_login_pass_field'));
+        $email = \Input::get(Config::get("$this->cpath.local_login_user_field"));
+        $password = \Input::get(Config::get("$this->cpath.local_login_pass_field"));
 
         if (Auth::attempt(array('email' => $email, 'password' => $password), true))
         {
@@ -52,14 +51,14 @@ class ShibbolethController extends Controller {
             if (isset($user->first_name)) Session::put('first', $user->first_name);
             if (isset($user->last_name)) Session::put('last', $user->last_name);
             if (isset($email)) Session::put('email', $user->email);
-            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id);
+            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id); //TODO: Look at this
 
 
             //Group Session Field
             if (isset($email)){
                 try{
                     $group = Group::whereHas('users', function($q){
-                        $q->where('email', '=', Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_email')));
+                        $q->where('email', '=', Request::server(Config::get("$this->cpath.idp_login_email")));
                     })->first();
 
                     Session::put('group', $group->name);
@@ -70,17 +69,17 @@ class ShibbolethController extends Controller {
 
             //Set session to know user is local
             Session::put('auth_type', 'local');
-            return Redirect::to('/local_landing');
+            return View::make('/local_landing');
         }
         else
         {
-            return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.login_fail'));
+            return View::make(Config::get("$this->cpath.login_fail"));
         }
     }
     
     public function local_landing()
     {
-        return View::make(Config::get('saitswebuwm/shibboleth::shibboleth.default_view'));
+        return View::make(Config::get("$this->cpath.default_view"));
     }
 
     /**
@@ -89,10 +88,10 @@ class ShibbolethController extends Controller {
      */
     public function idpAuthorize()
     {
-        $email = Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_email'));
-        $first_name = Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_first'));
-        $last_name = Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_last'));
-        
+        $email = Request::server(Config::get("$this->cpath.idp_login_email"));
+        $first_name = Request::server(Config::get("$this->cpath.idp_login_first"));
+        $last_name = Request::server(Config::get("$this->cpath.idp_login_last"));
+
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
         if (Auth::attempt(array('email' => $email), true))
@@ -100,13 +99,13 @@ class ShibbolethController extends Controller {
             if (isset($first_name)) Session::put('first', $first_name);
             if (isset($last_name)) Session::put('last', $last_name);
             if (isset($email)) Session::put('email', $email);
-            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id);
+            if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id); //TODO: Check this
 
             //Group Session Field
             if (isset($email)){
                 try{
                     $group = Group::whereHas('users', function($q){
-                        $q->where('email', '=', Request::server(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login_email')));
+                        $q->where('email', '=', Request::server(Config::get("$this->cpath.idp_login_email")));
                     })->first();
 
                     Session::put('group', $group->name);
@@ -114,10 +113,11 @@ class ShibbolethController extends Controller {
                     Session::put('group', 'undefined');
                 }
             }
-            
+
+
             //Set session to know user is idp
             Session::put('auth_type', 'idp');
-            return Redirect::to('/idp_landing');
+            return View::make('shibboleth::authorized');
         }
         else
         {
@@ -130,20 +130,20 @@ class ShibbolethController extends Controller {
                         'last_name' => $last_name,
                         'enabled' => 0
                     ));
-                $group = Group::find(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_group'));
+                $group = Group::find(Config::get("$this->cpath.shibboleth_group"));
 
                 $group->users()->save($user);
 
-                return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.idp_login') . '?target=' . action('Saitswebuwm\Shibboleth\ShibbolethController@idpAuthorize'));
+                return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . Config::get("$this->cpath.idp_login") . '?target=' . action($this->ctrpath . "idpAuthorize"));
             }
 
-            return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.login_fail'));
+            return View::make(Config::get("$this->cpath.login_fail"));
         }
     }
 
     public function idp_landing()
     {
-        return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.shibboleth_view'));
+        return View::make(Config::get("$this->cpath.shibboleth_view"));
     }
     
     /**
@@ -164,10 +164,10 @@ class ShibbolethController extends Controller {
 
         if(Session::get('auth_type') == 'idp'){
             Session::flush();
-            return Redirect::to(Config::get('saitswebuwm/shibboleth::shibboleth.idp_logout'));
+            return Redirect::to('https://' . Request::server('SERVER_NAME') .Config::get("$this->cpath.port") . Config::get("$this->cpath.idp_logout"));
         }else{
             Session::flush();
-            return View::make(Config::get('saitswebuwm/shibboleth::shibboleth.local_logout'));
+            return View::make(Config::get("$this->cpath.local_logout"));
         }
     }
 }

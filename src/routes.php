@@ -12,12 +12,6 @@ Route::get('/login', 'Saitswebuwm\Shibboleth\ShibbolethController@create');
 Route::get('/logout',  'Saitswebuwm\Shibboleth\ShibbolethController@destroy');
 
 /**
- * Callback function for authorizing the user after the IDP has successfully
- * authenticated the user.
- */
-Route::get('/authorize',  'Saitswebuwm\Shibboleth\ShibbolethController@authorize');
-
-/**
  * This route gives current session information. It can be useful for
  * debugging issues.
  */
@@ -50,5 +44,5 @@ Route::get('/local_landing', 'Saitswebuwm\Shibboleth\ShibbolethController@local_
 
 Route::get('/unauthorized', function()
 {
-   return View::make(\Config::get('Shibboleth::shibboleth.default_unauth'));
+   return View::make(\Config::get('shibboleth::shibboleth.default_unauth'));
 });

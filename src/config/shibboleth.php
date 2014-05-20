@@ -16,11 +16,12 @@ return array(
 	| Supported: "database", "eloquent"
 	|
 	*/
-    
-    'idp_login' => 'your.idp.login',
-    'idp_logout' => 'your.idp.logout',
-    'local_logout' => 'saitswebuwm/shibboleth::local',
-    'login_fail' => '/unauthorized',
+
+    'port' => ':443',
+    'idp_login' => '/Shibboleth.sso/Login',
+    'idp_logout' => '/Shibboleth.sso/Logout',
+    'local_logout' => 'shibboleth::local',
+    'login_fail' => 'shibboleth::unauthorized',
 
 	/*
 	|--------------------------------------------------------------------------
@@ -32,10 +33,10 @@ return array(
 	|
 	*/
 
-    'login_view' => 'saitswebuwm/shibboleth::local', // View that local users should use to login
-    'shibboleth_view' => 'saitswebuwm/shibboleth::authorized', // View shibboleth users see after authenticating
-    'default_view' => 'saitswebuwm/shibboleth::authorized', // View users see after authenticating
-    'default_unauth' => 'saitswebuwm/shibboleth::unauthorized', // View users see when rejected
+    'login_view' => 'shibboleth::local', // View that local users should use to login
+    'shibboleth_view' => 'shibboleth::authorized', // View shibboleth users see after authenticating
+    'default_view' => 'shibboleth::authorized', // View users see after authenticating
+    'default_unauth' => 'shibboleth::unauthorized', // View users see when rejected
 
 	/*
 	|--------------------------------------------------------------------------
