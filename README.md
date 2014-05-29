@@ -23,7 +23,7 @@ Now we can set it up for your install. Run the following two commands to created
 
 <pre><code>php artisan config:publish saitswebuwm/shibboleth
 php artisan migrate --package="saitswebuwm/shibboleth"
-php artisan view:publish saitswebuwm/shibboleth</code></pre
+php artisan view:publish saitswebuwm/shibboleth</code></pre>
 
 Change the following line in your /config/auth.php file to use the the shibboleth driver.
 
