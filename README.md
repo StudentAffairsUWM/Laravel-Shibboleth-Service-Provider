@@ -23,7 +23,11 @@ Now we can set it up for your install. Run the following two commands to created
 
 <pre><code>php artisan config:publish saitswebuwm/shibboleth
 php artisan migrate --package="saitswebuwm/shibboleth"
-php artisan view:publish saitswebuwm/shibboleth</code></pre>
+php artisan view:publish saitswebuwm/shibboleth</code></pre
+
+Change the following line in your /config/auth.php file to use the the shibboleth driver.
+
+<pre><code>'driver' => 'shibboleth'</code></pre>
 
 You will need to configure your .htaccess with whatever your setup involves. By default I have included a .htaccess in the src directory that will allow both shibboleth and non shibboleth users to view the application. Place it in your public folder if this behavior will work for your application.
 
