@@ -58,7 +58,7 @@ return array(
 	| Groups Settings
 	|--------------------------------------------------------------------------
 	|
-	| Change the group setting acording to your database and program requirements.
+	| Change the group setting according to your database and program requirements.
 	|
 	*/
 
