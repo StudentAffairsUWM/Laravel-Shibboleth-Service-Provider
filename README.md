@@ -3,6 +3,8 @@ Laravel Shibboleth Service Provider
 
 Shibboleth Authentication for Laravel
 
+It is suggested to always use the version tagged as they are proven to work and stable. We will likely remove all old tags onces 1.0.0 is released to avoid clutter.
+
 Include the follwoing in your composer.json file and run composer update or install if it's a new project.
 
 <pre><code>{
