@@ -117,7 +117,11 @@ class ShibbolethController extends Controller {
 
             //Set session to know user is idp
             Session::put('auth_type', 'idp');
-            return View::make('shibboleth::authorized');
+            
+            $shib_view_config = Config::get("$this->cpath.shibboleth_view");
+            //Check if route exists else redirect
+            if(View::exists($shib_view_config)) return View::make($shib_view_config);
+            else return Redirect::to($shib_view_config);
         }
         else
         {
