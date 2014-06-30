@@ -103,13 +103,16 @@ class ShibbolethController extends Controller {
 
             //Group Session Field
             if (isset($email)){
-                try{
-                    $group = Group::whereHas('users', function($q){
+                try
+                {
+                    $group = Group::with([ 'users' => function($q){
                         $q->where('email', '=', Request::server(Config::get("$this->cpath.idp_login_email")));
-                    })->first();
+                    }])->first();
 
                     Session::put('group', $group->name);
-                }catch(Exception $e){ // TODO: Remove later after all auth is set up.
+                }
+                catch(Exception $e)
+                { // TODO: Remove later after all auth is set up.
                     Session::put('group', 'undefined');
                 }
             }
