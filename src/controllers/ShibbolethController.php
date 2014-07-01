@@ -105,9 +105,9 @@ class ShibbolethController extends Controller {
             if (isset($email)){
                 try
                 {
-                    $group = Group::with([ 'users' => function($q){
+                    $group = Group::whereHas('users', function($q){
                         $q->where('email', '=', Request::server(Config::get("$this->cpath.idp_login_email")));
-                    }])->first();
+                    })->first();
 
                     Session::put('group', $group->name);
                 }
