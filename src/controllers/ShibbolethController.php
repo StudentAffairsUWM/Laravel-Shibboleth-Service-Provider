@@ -15,12 +15,30 @@ class ShibbolethController extends Controller {
     private $cpath = "shibboleth::shibboleth";
     private $ctrpath = "Saitswebuwm\\Shibboleth\\ShibbolethController@";
     
+	private $sp;
+	private $idp;
+	private $config;
+	
     /**
      * Inject the user into this controller if present.
      */
     public function __construct(GenericUser $user = null)
     {
-        $this->user = $user;
+		if (Config::get("$this->cpath.emulate_idp") == true)
+		{
+			$this->config = new \Shibalike\Config();
+			$this->config->idpUrl = 'idp';
+			
+			$storage = new \Shibalike\Util\UserlandSession\Storage\Files('SHIBALIKE_BASIC');
+			$stateManager = new \Shibalike\StateManager\UserlandSession(\Shibalike\Util\UserlandSession::factory($storage));
+
+			$this->sp = new \Shibalike\SP($stateManager, $this->config);
+			$this->sp->initLazySession();
+			
+			$this->idp = new \Shibalike\IdP($stateManager, $this->getAttrStore(), $this->config);
+		}
+		
+		$this->user = $user;
     }
     
     /**
@@ -29,7 +47,14 @@ class ShibbolethController extends Controller {
      */
     public function create()
     {
-        return Redirect::to( 'https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . Config::get("$this->cpath.idp_login") . '?target=' . action($this->ctrpath . "idpAuthorize"));
+		if (Config::get("$this->cpath.emulate_idp") == true)
+		{
+			return Redirect::to( action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+		}
+		else
+		{
+			return Redirect::to( 'https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . Config::get("$this->cpath.idp_login") . '?target=' . action($this->ctrpath . "idpAuthorize"));
+		}
     }
     
     /**
@@ -40,6 +65,9 @@ class ShibbolethController extends Controller {
         return View::make(Config::get("$this->cpath.login_view"));
     }
     
+	/**
+	 * Authorize function for users not using the IdP
+	 */
     public function localAuthorize()
     {
         $email = \Input::get(Config::get("$this->cpath.local_login_user_field"));
@@ -77,6 +105,9 @@ class ShibbolethController extends Controller {
         }
     }
     
+	/**
+	 * Local user landing page
+	 */
     public function local_landing()
     {
         return View::make(Config::get("$this->cpath.default_view"));
@@ -84,14 +115,14 @@ class ShibbolethController extends Controller {
 
     /**
      * Setup authorization based on returned server variables
-     * from the IDP.
+     * from the IdP.
      */
     public function idpAuthorize()
     {
-        $email = Request::server(Config::get("$this->cpath.idp_login_email"));
-        $first_name = Request::server(Config::get("$this->cpath.idp_login_first"));
-        $last_name = Request::server(Config::get("$this->cpath.idp_login_last"));
-
+        $email = $this->getServerVariable(Config::get("$this->cpath.idp_login_email"));
+        $first_name = $this->getServerVariable(Config::get("$this->cpath.idp_login_first"));
+        $last_name = $this->getServerVariable(Config::get("$this->cpath.idp_login_last"));
+		
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
         if (Auth::attempt(array('email' => $email), true))
@@ -102,11 +133,12 @@ class ShibbolethController extends Controller {
             if (isset($email)) Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id); //TODO: Check this
 
             //Group Session Field
-            if (isset($email)){
+            if (isset($email))
+			{
                 try
                 {
                     $group = Group::whereHas('users', function($q){
-                        $q->where('email', '=', Request::server(Config::get("$this->cpath.idp_login_email")));
+                        $q->where('email', '=', $this->getServerVariable(Config::get("$this->cpath.idp_login_email")));
                     })->first();
 
                     Session::put('group', $group->name);
@@ -123,13 +155,14 @@ class ShibbolethController extends Controller {
             
             $shib_view_config = Config::get("$this->cpath.shibboleth_view");
             //Check if route exists else redirect
-            if(View::exists($shib_view_config)) return View::make($shib_view_config);
+            if (View::exists($shib_view_config)) return View::make($shib_view_config);
             else return Redirect::to($shib_view_config);
         }
         else
         {
             //Add user to group and send through auth.
-            if(isset($email)){
+            if (isset($email))
+			{
                 $user = UserShibboleth::create(array(
                         'email' => $email,
                         'type' => 'shibboleth',
@@ -169,12 +202,93 @@ class ShibbolethController extends Controller {
     {
         Auth::logout();
 
-        if(Session::get('auth_type') == 'idp'){
-            Session::flush();
-            return Redirect::to('https://' . Request::server('SERVER_NAME') .Config::get("$this->cpath.port") . Config::get("$this->cpath.idp_logout"));
-        }else{
+        if(Session::get('auth_type') == 'idp')
+		{
+			if (Config::get("$this->cpath.emulate_idp") == true)
+			{ 
+				Session::flush();
+				return Redirect::to( action($this->ctrpath . 'emulateLogout'));
+			}
+			else
+			{
+				Session::flush();
+				return Redirect::to('https://' . Request::server('SERVER_NAME') .Config::get("$this->cpath.port") . Config::get("$this->cpath.idp_logout"));
+            }
+        }
+		else
+		{
             Session::flush();
             return View::make(Config::get("$this->cpath.local_logout"));
         }
     }
+	
+	function getAttrStore() 
+	{
+		return new \Shibalike\Attr\Store\ArrayStore(Config::get("$this->cpath.emulate_idp_users"));
+	}
+	
+	public function emulateLogin()
+    {
+        $from = (Request::get('target') != null) ? Request::get('target') : $this->getServerVariable('HTTP_REFERER');
+
+        $this->sp->makeAuthRequest($from);
+        $this->sp->redirect();
+    }
+
+    public function emulateLogout()
+    {
+        $this->sp->logout();
+        die('Goodbye, fair user. <a href="' . $this->getServerVariable('HTTP_REFERER') . '">Return from whence you came</a>!');
+    }
+
+    public function emulateIdp()
+    {
+		if (Request::get('username') != null)
+		{
+            $username = '';
+            if (Request::get('username') === Request::get('password')) 
+			{
+                $username = Request::get('username');
+            }
+            
+            $userAttrs = $this->idp->fetchAttrs($username);
+            if ($userAttrs) 
+			{
+                $this->idp->markAsAuthenticated($username);
+                $this->idp->redirect();
+            } 
+			else 
+			{
+                echo "Sorry. You failed to authenticate. <a href='idp'>Try again</a>";
+            }
+        }
+		?>
+		<form action="" method="post">
+			<dl>
+				<dt>Username</dt><dd><input size="20" name="username"></dd>
+				<dt>Password</dt><dd><input size="20" name="password" type="password"></dd>
+			</dl>
+			<p><input type="submit" value="Login"></p>
+		</form>
+	<?php
+    }
+	
+	/**
+	 * Wrapper function for getting server variables.
+	 * Since Shibalike injects $_SERVER variables Laravel
+	 * doesn't pick them up. So depending on if we are
+	 * using the emulated IdP or a real one, we use the
+	 * appropriate function.
+	 */
+	private function getServerVariable($variableName)
+	{
+		if (Config::get("$this->cpath.emulate_idp") == true)
+		{ 
+			return isset($_SERVER[$variableName]) ? $_SERVER[$variableName] : null;
+		}
+		else
+		{
+			return Request::server($variableName);
+		}
+	}
 }

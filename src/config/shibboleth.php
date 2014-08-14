@@ -25,6 +25,41 @@ return array(
 
 	/*
 	|--------------------------------------------------------------------------
+	| IdP Emulation
+	|--------------------------------------------------------------------------
+	|
+	| Allows you to emulate an IdP without setting up a test Shibboleth env.
+	| Do NOT use this in production for any reason whatsoever.
+	| You have been warned.
+	|
+	*/
+	'emulate_idp' => 'false',
+	'emulate_idp_users' => array(
+		'admin' => array(
+			'uid' => 'admin',
+			'displayName' => 'Admin User',
+			'givenName' => 'Admin',
+			'sn' => 'User',
+			'mail' => 'admin@uwm.edu',
+		),
+		'staff' => array(
+			'uid' => 'staff',
+			'displayName' => 'Staff User',
+			'givenName' => 'Staff',
+			'sn' => 'User',
+			'mail' => 'staff@uwm.edu',
+		),
+		'user' => array(
+			'uid' => 'user',
+			'displayName' => 'User User',
+			'givenName' => 'User',
+			'sn' => 'User',
+			'mail' => 'user@uwm.edu',
+		),
+	),
+	
+	/*
+	|--------------------------------------------------------------------------
 	| Default Views
 	|--------------------------------------------------------------------------
 	|

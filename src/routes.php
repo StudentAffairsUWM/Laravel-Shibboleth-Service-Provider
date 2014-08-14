@@ -46,3 +46,8 @@ Route::get('/unauthorized', function()
 {
    return View::make(\Config::get('shibboleth::shibboleth.default_unauth'));
 });
+
+Route::get('emulated/idp', 'Saitswebuwm\Shibboleth\ShibbolethController@emulateIdp');
+Route::post('emulated/idp', 'Saitswebuwm\Shibboleth\ShibbolethController@emulateIdp');
+Route::get('emulated/login', 'Saitswebuwm\Shibboleth\ShibbolethController@emulateLogin');
+Route::get('emulated/logout', 'Saitswebuwm\Shibboleth\ShibbolethController@emulateLogout');
