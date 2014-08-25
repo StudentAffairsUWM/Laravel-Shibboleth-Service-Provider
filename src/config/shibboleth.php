@@ -31,9 +31,11 @@ return array(
 	| Allows you to emulate an IdP without setting up a test Shibboleth env.
 	| Do NOT use this in production for any reason whatsoever.
 	| You have been warned.
+	| 
+	| YOU MUST USE FALSE AND NOT "FALSE" PHP CONVERTS ALL STRINGS EXCEPT "0" TO TRUE.
 	|
 	*/
-	'emulate_idp' => 'false',
+	'emulate_idp' => false,
 	'emulate_idp_users' => array(
 		'admin' => array(
 			'uid' => 'admin',
