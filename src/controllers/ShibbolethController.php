@@ -288,7 +288,9 @@ class ShibbolethController extends Controller {
 		}
 		else
 		{
-			return Request::server($variableName);
+			$nonRedirect = Request::server($variableName);
+            $redirect = Request::server('REDIRECT_' . $variableName);
+            return (!empty($nonRedirect)) ? $nonRedirect : $redirect;
 		}
 	}
 }
