@@ -29,8 +29,7 @@ class ShibbolethController extends Controller {
 			$this->config = new \Shibalike\Config();
 			$this->config->idpUrl = 'idp';
 			
-			$storage = new \Shibalike\Util\UserlandSession\Storage\Files('SHIBALIKE_BASIC');
-			$stateManager = new \Shibalike\StateManager\UserlandSession(\Shibalike\Util\UserlandSession::factory($storage));
+			$stateManager = $this->getStateManager();
 
 			$this->sp = new \Shibalike\SP($stateManager, $this->config);
 			$this->sp->initLazySession();
@@ -225,6 +224,14 @@ class ShibbolethController extends Controller {
 	function getAttrStore() 
 	{
 		return new \Shibalike\Attr\Store\ArrayStore(Config::get("$this->cpath.emulate_idp_users"));
+	}
+
+	function getStateManager() {
+		$session = \UserlandSession\SessionBuilder::instance()
+			->setSavePath(sys_get_temp_dir())
+			->setName('SHIBALIKE_BASIC')
+			->build();
+		return new \Shibalike\StateManager\UserlandSession($session);
 	}
 	
 	public function emulateLogin()
