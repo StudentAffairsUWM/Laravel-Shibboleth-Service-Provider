@@ -14,8 +14,18 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-AuthType Shibboleth
-Require Shibboleth
-ShibUseHeaders On
-ShibRequireSession Off
-ShibRequestSetting isPassive Off
+<IfModule mod_shib_22.so>
+    AuthType shibboleth
+    Require shibboleth
+    ShibUseHeaders On
+    ShibRequireSession Off
+    ShibRequestSetting isPassive Off
+</IfModule>
+
+<IfModule mod_shib_24.so>
+    AuthType shibboleth
+    Require shibboleth
+    ShibUseHeaders On
+    ShibRequireSession Off
+    ShibRequestSetting isPassive Off
+</IfModule>
