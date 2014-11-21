@@ -4,7 +4,7 @@ Laravel Shibboleth Service Provider
 This package provides an easy way to implement Shibboleth Authentication for Laravel.
 
 **Please Note**
-In order to use this plugin, you need to have a pre-existing  does not explain how to setup your Shibboleth SP or Shibboleth IdP. I recommend [http://www.google.com/](http://www.google.com/ "Google"), they've got some pretty cool things.
+In order to use this plugin, we assume you already have a pre-existing Shibboleth SP and Shibboleth IdP configured. This does not go into explaining how to set that up. I recommend [http://www.google.com/](http://www.google.com/ "Google"), they've got some pretty cool things.
 
 We also recommend that you use the *tagged* versions as they are proven to work, and are also **stable**. We will likely remove all old tags once v1.0.0 is released to avoid clutter.
 
