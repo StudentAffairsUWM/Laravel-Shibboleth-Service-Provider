@@ -165,7 +165,7 @@ class ShibbolethController extends Controller {
 		} else {
 			//Add user to group and send through auth.
 			if (isset($email)) {
-				if (Config::get("$this->cpath.add_new_users")) {
+				if (Config::get("$this->cpath.add_new_users", true)) {
 					$user = UserShibboleth::create(array(
 						'email'      => $email,
 						'type'       => 'shibboleth',
