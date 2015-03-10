@@ -4,8 +4,8 @@ use Illuminate\Auth\GenericUser;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 
@@ -56,7 +56,7 @@ class ShibbolethController extends Controller
     // TODO: Local users are not implemented properly.
     public function localCreate()
     {
-        return $this->viewOrRedirect(config('shibboleth.login_view'));
+        return $this->viewOrRedirect(config('shibboleth.local_login'));
     }
 
     /**
@@ -108,7 +108,7 @@ class ShibbolethController extends Controller
             Session::put('auth_type', 'local');
             return $this->viewOrRedirect('/local_landing');
         } else {
-            return $this->viewOrRedirect(config('shibboleth.login_fail'));
+            return $this->viewOrRedirect(config('shibboleth.local_unauthorized'));
         }
     }
 
@@ -118,7 +118,7 @@ class ShibbolethController extends Controller
     // TODO: Local users are not implemented properly.
     public function local_landing()
     {
-        return $this->viewOrRedirect(config('shibboleth.default_view'));
+        return $this->viewOrRedirect(config('shibboleth.local_authorized'));
     }
 
     /**
@@ -174,7 +174,7 @@ class ShibbolethController extends Controller
                 Session::put('group', 'undefined');
             }
 
-            return $this->viewOrRedirect(config('shibboleth.shibboleth_view'));
+            return $this->viewOrRedirect(config('shibboleth.shibboleth_authenticated'));
 
         } else {
             //Add user to group and send through auth.
@@ -203,7 +203,7 @@ class ShibbolethController extends Controller
                     Session::put('auth_type', 'no_user');
                     Session::put('group', 'undefined');
 
-                    return $this->viewOrRedirect(config('shibboleth.login_fail'));
+                    return $this->viewOrRedirect(config('shibboleth.shibboleth_unauthorized'));
                 }
             }
 
@@ -235,7 +235,7 @@ class ShibbolethController extends Controller
      */
     public function emulateLogin()
     {
-        $from = (Request::get('target') != null) ? Request::get('target') : $this->getServerVariable('HTTP_REFERER');
+        $from = (Input::get('target') != null) ? Input::get('target') : $this->getServerVariable('HTTP_REFERER');
 
         $this->sp->makeAuthRequest($from);
         $this->sp->redirect();
@@ -255,10 +255,10 @@ class ShibbolethController extends Controller
      */
     public function emulateIdp()
     {
-        if (Request::get('username') != null) {
+        if (Input::get('username') != null) {
             $username = '';
-            if (Request::get('username') === Request::get('password')) {
-                $username = Request::get('username');
+            if (Input::get('username') === Input::get('password')) {
+                $username = Input::get('username');
             }
 
             $userAttrs = $this->idp->fetchAttrs($username);
