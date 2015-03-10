@@ -1,6 +1,7 @@
 {
-    "name": "saitswebuwm/shibboleth",
-    "description": "Enable basic Shibboleth support for Laravel.",
+    "name": "studentaffairsuwm/shibboleth",
+    "description": "Enable basic Shibboleth support for Laravel 5.",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Christopher Maio",
@@ -8,21 +9,17 @@
         },
         {
             "name": "Michael Schuett",
-            "email": "mschuett@uwm.edu"
+            "email": "michaeljs1990@gmail.com"
         }
     ],
     "require": {
-        "php": ">=5.3.0",
-		"mrclay/shibalike": "1.0.0"
+        "php": ">=5.4.0",
+        "illuminate/support": "5.0.*",
+        "mrclay/shibalike": "1.0.0"
     },
     "autoload": {
-        "classmap": [
-            "src/migrations",
-            "src/controllers",
-            "src/models"
-        ],
-        "psr-0": {
-            "Saitswebuwm\\Shibboleth\\": "src/"
+        "psr-4": {
+            "StudentAffairsUwm\\Shibboleth\\": "src/StudentAffairsUwm/Shibboleth"
         }
     },
     "minimum-stability": "stable"

@@ -2,104 +2,89 @@
 
 return array(
 
-	'package'                => 'saitswebuwm/shibboleth',
+    /*
+    |--------------------------------------------------------------------------
+    | Views / Endpoints
+    |--------------------------------------------------------------------------
+    |
+    | Set your login page, or login routes, here. If you provide a view,
+    | that will be rendered. Otherwise, it will redirect to a route.
+    |
+     */
 
-	/*
-	|--------------------------------------------------------------------------
-	| Default Authentication Driver
-	|--------------------------------------------------------------------------
-	|
-	| This option controls the authentication driver that will be utilized.
-	| This driver manages the retrieval and authentication of the users
-	| attempting to get access to protected areas of your application.
-	|
-	| Supported: "database", "eloquent"
-	|
-	 */
+    'local_login'              => 'localLogin',
+    'local_logout'             => 'localLogout',
+    'local_authorized'         => 'authed',
+    'local_unauthorized'       => 'loginUnauthorized',
 
-	'port'                   => ':443',
-	'idp_login'              => '/Shibboleth.sso/Login',
-	'idp_logout'             => '/Shibboleth.sso/Logout',
-	'local_logout'           => 'shibboleth::local',
-	'login_fail'             => 'shibboleth::unauthorized',
+    'idp_login'                => '/Shibboleth.sso/Login',
+    'idp_logout'               => '/Shibboleth.sso/Logout',
+    'shibboleth_authenticated' => 'authed',
+    'shibboleth_unauthorized'  => 'loginUnauthorized',
 
-	/*
-	|--------------------------------------------------------------------------
-	| IdP Emulation
-	|--------------------------------------------------------------------------
-	|
-	| Allows you to emulate an IdP without setting up a test Shibboleth env.
-	| Do NOT use this in production for any reason whatsoever.
-	| You have been warned.
-	|
-	| YOU MUST USE FALSE AND NOT "FALSE" PHP CONVERTS ALL STRINGS EXCEPT "0" TO TRUE.
-	|
-	 */
-	'emulate_idp'            => false,
-	'emulate_idp_users'      => array(
-		'admin' => array(
-			'uid'         => 'admin',
-			'displayName' => 'Admin User',
-			'givenName'   => 'Admin',
-			'sn'          => 'User',
-			'mail'        => 'admin@uwm.edu',
-		),
-		'staff' => array(
-			'uid'         => 'staff',
-			'displayName' => 'Staff User',
-			'givenName'   => 'Staff',
-			'sn'          => 'User',
-			'mail'        => 'staff@uwm.edu',
-		),
-		'user'  => array(
-			'uid'         => 'user',
-			'displayName' => 'User User',
-			'givenName'   => 'User',
-			'sn'          => 'User',
-			'mail'        => 'user@uwm.edu',
-		),
-	),
+    /*
+    |--------------------------------------------------------------------------
+    | Emulate an IdP
+    |--------------------------------------------------------------------------
+    |
+    | In case you do not have access to your Shibboleth environment on
+    | homestead or your own Vagrant box, you can emulate a Shibboleth
+    | environment with the help of Shibalike.
+    |
+    | Do not use this in production for literally any reason.
+    |
+     */
 
-	/*
-	|--------------------------------------------------------------------------
-	| Default Views
-	|--------------------------------------------------------------------------
-	|
-	| Default views, to change to the views you made you can change the following
-	| lines.
-	|
-	 */
+    'emulate_idp'              => true,
+    'emulate_idp_users'        => array(
+        'admin' => array(
+            'uid'         => 'admin',
+            'displayName' => 'Admin User',
+            'givenName'   => 'Admin',
+            'sn'          => 'User',
+            'mail'        => 'admin@uwm.edu',
+        ),
+        'staff' => array(
+            'uid'         => 'staff',
+            'displayName' => 'Staff User',
+            'givenName'   => 'Staff',
+            'sn'          => 'User',
+            'mail'        => 'staff@uwm.edu',
+        ),
+        'user'  => array(
+            'uid'         => 'user',
+            'displayName' => 'User User',
+            'givenName'   => 'User',
+            'sn'          => 'User',
+            'mail'        => 'user@uwm.edu',
+        ),
+    ),
 
-	'login_view'             => 'shibboleth::local', // View that local users should use to login
-	'shibboleth_view'        => 'shibboleth::authorized', // View shibboleth users see after authenticating
-	'default_view'           => 'shibboleth::authorized', // View users see after authenticating
-	'default_unauth'         => 'shibboleth::unauthorized', // View users see when rejected
+    /*
+    |--------------------------------------------------------------------------
+    | Server Variable Mapping
+    |--------------------------------------------------------------------------
+    |
+    | Change these to the proper values for your IdP.
+    |
+     */
 
-	/*
-	|--------------------------------------------------------------------------
-	| Defaults Settings
-	|--------------------------------------------------------------------------
-	|
-	| Change these setting do the proper values for your idp.
-	|
-	 */
+    'local_login_user_field'   => 'local_email',
+    'local_login_pass_field'   => 'local_password',
+    'idp_login_email'          => 'mail',
+    'idp_login_first'          => 'givenName',
+    'idp_login_last'           => 'sn',
 
-	'local_login_user_field' => 'local_email', //post field used to get username
-	'local_login_pass_field' => 'local_password', //post field used to get password
-	'idp_login_email'        => 'mail', //idp server variable for email address
-	'idp_login_first'        => 'givenName', //idp server variable for first name
-	'idp_login_last'         => 'sn', //idp server variable for last name
+    /*
+    |--------------------------------------------------------------------------
+    | User Creation and Groups Settings
+    |--------------------------------------------------------------------------
+    |
+    | Allows you to change if / how new users are added
+    |
+     */
 
-	/*
-	|--------------------------------------------------------------------------
-	| User Creation and Groups Settings
-	|--------------------------------------------------------------------------
-	|
-	| Allows you to change if/how new users are added
-	|
-	 */
-
-	'add_new_users'          => true, // Whether new shibboleth users should be added
-	'shibboleth_group'       => '1', // Default group ID shibboleth users will be added to
+    'add_new_users'            => true, // Should new users be added automatically if they do not exist?
+    'shibboleth_group'         => '1', // What group should the new users be automatically added to?
 
 );
