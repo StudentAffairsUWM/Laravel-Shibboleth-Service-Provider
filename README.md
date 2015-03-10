@@ -3,33 +3,31 @@ Laravel Shibboleth Service Provider
 
 This package provides an easy way to implement Shibboleth Authentication for Laravel 5.
 
-** Please Note **
+## Features ##
 
-This is still a work in progress. Do not use in production!
+- Compatibility with Laravel 5
+- Includes User and Group model examples
+- Ability to *emulate* an IdP (via [https://github.com/mrclay/shibalike](https://github.com/mrclay/shibalike "Shibalike"))
 
-** Seriously, read that note! **
+## Pre-Requisites ##
 
-**Please Note**
-In order to use this plugin, we assume you already have a pre-existing Shibboleth SP and Shibboleth IdP configured. This does not go into explaining how to set that up. I recommend [http://www.google.com/](http://www.google.com/ "Google"), they've got some pretty cool things.
-
-We also recommend that you use the *tagged* versions as they are proven to work, and are also **stable**. We will likely remove all old tags once v1.0.0 is released to avoid clutter.
+In order to use this plugin, we assume you already have a pre-existing Shibboleth SP and Shibboleth IdP configured. This does not (and will not) go into explaining how to set that up.
 
 ## Installation ##
 
 Include the following in your `composer.json` file and run `composer update` (or `composer install` if it's a new project).
 
-
     {
         "require": {
-            "saitswebuwm/shibboleth": "dev-master"
+            "studentaffairsuwm/shibboleth": "1.0.0"
         }
     }
 
-Then, you will want to include the following line in the end of your `/app/config/app.php` file in the `Providers` array.
+Then, append the following line inside your `/config/app.php` file within the `Providers` array.
 
-    'Saitswebuwm\Shibboleth\ShibbolethServiceProvider'
+    'StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider'
 
-Add this to your config/auth.php
+You'll also want to add this to your `/config/auth.php` file.
 
     /*
     |--------------------------------------------------------------------------
@@ -44,21 +42,17 @@ Add this to your config/auth.php
     
     'group_model' => 'App\Group',
 
-This includes migrations for both a User and Group table, and will create the models for you. ADD MORE HERE?
+Finally, we just need to publish to include some default models, the database migrations, and the configuration file in your project. We include migrations for a simple user and group table, it is up to you to expand upon those.
 
-Now all your file changes are (mostly) ready. Run the following two commands to create the needed database tables and configuration files.
+Run the following commands to publish and then migrate your database:
 
     $ php artisan vendor:publish
     $ php artisan migrate
 
-Once this is done, you can activate the Shibboleth driver in your `/config/auth.php` file.
+Once the migrations have run successfully, change the driver to `shibboleth` in your `/config/auth.php` file.
 
     'driver' => 'shibboleth'
 
-You will need to configure your `.htaccess` or other web server configurations with whatever your setup involves. By default, we have included a `.htaccess` in the `/src/` directory that will allow for both Shibboleth and non-Shibboleth users to view the application.
+## Looking for Laravel 4? ##
 
-## Recent Changes ##
-
-### v0.5.5 ###
-
-- Added in the ability to *emulate* a Shibboleth IdP environment with the help of [https://github.com/mrclay/shibalike](https://github.com/mrclay/shibalike "Shibalike")
+We have stopped development on the Laravel 4 version of this plugin for now. We are welcoming pull requests, however! Feel free to use any tag below 1.0.0 for Laravel 4 compatible versions.

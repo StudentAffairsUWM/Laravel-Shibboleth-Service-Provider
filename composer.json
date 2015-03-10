@@ -1,6 +1,7 @@
 {
-    "name": "student-affairs-uwm/shibboleth",
-    "description": "",
+    "name": "studentaffairsuwm/shibboleth",
+    "description": "Enable basic Shibboleth support for Laravel 5.",
+    "version": "1.0.0",
     "authors": [
         {
             "name": "Christopher Maio",
@@ -18,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "StudentAffairsUwm\\Shibboleth": "src/StudentAffairsUwm/Shibboleth"
+            "StudentAffairsUwm\\Shibboleth\\": "src/StudentAffairsUwm/Shibboleth"
         }
     },
     "minimum-stability": "stable"

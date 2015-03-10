@@ -11,14 +11,29 @@ use Illuminate\Support\Facades\View;
 
 class ShibbolethController extends Controller
 {
+    // TODO: Can we get rid of this and get it more dynamically?
     private $ctrpath = "\StudentAffairsUwm\\Shibboleth\\Controllers\\ShibbolethController@";
 
+    /**
+     * Service Provider
+     * @var Shibalike\SP
+     */
     private $sp;
+
+    /**
+     * Identity Provider
+     * @var Shibalike\IdP
+     */
     private $idp;
+
+    /**
+     * Configuration
+     * @var Shibalike\Config
+     */
     private $config;
 
     /**
-     * Inject the user into this controller if present.
+     * Constructor
      */
     public function __construct(GenericUser $user = null)
     {
@@ -51,22 +66,20 @@ class ShibbolethController extends Controller
     }
 
     /**
-     * Login for users not using the IDP
+     * Login for users not using the IdP.
      */
-    // TODO: Local users are not implemented properly.
     public function localCreate()
     {
         return $this->viewOrRedirect(config('shibboleth.local_login'));
     }
 
     /**
-     * Authorize function for users not using the IdP
+     * Authorize function for users not using the IdP.
      */
-    // TODO: Local users are not implemented properly.
     public function localAuthorize()
     {
-        $email    = \Input::get(config('shibboleth.local_login_user_field'));
-        $password = \Input::get(config('shibboleth.local_login_pass_field'));
+        $email    = Input::get(config('shibboleth.local_login_user_field'));
+        $password = Input::get(config('shibboleth.local_login_pass_field'));
 
         if (Auth::attempt(array('email' => $email, 'password' => $password), true)) {
             $userClass  = config('auth.model');
@@ -106,19 +119,10 @@ class ShibbolethController extends Controller
 
             // Set session to know user is local
             Session::put('auth_type', 'local');
-            return $this->viewOrRedirect('/local_landing');
+            return $this->viewOrRedirect(config('shibboleth.local_authorized'));
         } else {
             return $this->viewOrRedirect(config('shibboleth.local_unauthorized'));
         }
-    }
-
-    /**
-     * Local user landing page
-     */
-    // TODO: Local users are not implemented properly.
-    public function local_landing()
-    {
-        return $this->viewOrRedirect(config('shibboleth.local_authorized'));
     }
 
     /**
@@ -136,6 +140,7 @@ class ShibbolethController extends Controller
 
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
+        // TODO: This can be simplified a lot
         if (Auth::attempt(array('email' => $email), true)) {
             $user = $userClass::where('email', '=', $email)->first();
 
@@ -192,7 +197,6 @@ class ShibbolethController extends Controller
                     $group->users()->save($user);
 
                     // this is simply brings us back to the session-setting branch directly above
-                    // TODO: refactor and split the purposes of these functions better
                     if (config('shibboleth.emulate_idp') == true) {
                         return Redirect::to(action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
                     } else {
@@ -359,14 +363,15 @@ class ShibbolethController extends Controller
     }
 
     /*
-     * simple function that allows config variables to
-     * be either names of Views OR redirect routes
+     * Simple function that allows configuration variables
+     * to be either names of views, or redirect routes.
      */
     private function viewOrRedirect($view)
     {
         if (View::exists($view)) {
             return view($view);
         }
+
         return Redirect::to($view);
     }
 }
