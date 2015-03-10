@@ -1,15 +1,15 @@
-<?php namespace Saitswebuwm\Shibboleth\Providers;
+<?php namespace StudentAffairsUwm\Shibboleth\Providers;
 
-use Illuminate\Auth\UserInterface;
-use Illuminate\Hashing\HasherInterface;
-use Illuminate\Auth\UserProviderInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\UserProvider as UserProviderInterface;
+use Illuminate\Hashing\BcryptHasher;
 
-class ShibbolethUserProvider implements UserProviderInterface 
+class ShibbolethUserProvider implements UserProviderInterface
 {
     /**
      * The hasher implementation.
      *
-     * @var \Illuminate\Hashing\HasherInterface
+     * @var \Illuminate\Hashing\BcryptHasher
      */
     protected $hasher;
 
@@ -23,13 +23,13 @@ class ShibbolethUserProvider implements UserProviderInterface
     /**
      * Create a new Shibboleth user provider.
      *
-     * @param  \Illuminate\Hashing\HasherInterface  $hasher
+     * @param  \Illuminate\Hashing\BcryptHasher  $hasher
      * @param  string  $model
      * @return void
      */
-    public function __construct(HasherInterface $hasher, $model)
+    public function __construct(BcryptHasher $hasher, $model)
     {
-        $this->model = $model;
+        $this->model  = $model;
         $this->hasher = $hasher;
     }
 
@@ -37,7 +37,7 @@ class ShibbolethUserProvider implements UserProviderInterface
      * Retrieve a user by their unique identifier.
      *
      * @param  mixed $identifier
-     * @return \Illuminate\Auth\UserInterface|null
+     * @return \Illuminate\Auth\Authenticatable | null
      */
     public function retrieveById($identifier)
     {
@@ -45,65 +45,72 @@ class ShibbolethUserProvider implements UserProviderInterface
         if ($user && $user->getAuthIdentifier() == $identifier) {
             return $user;
         }
+        return null;
     }
 
     /**
      * Retrieve a user by the given credentials.
      *
      * @param  array $credentials
-     * @return \Illuminate\Auth\UserInterface
+     * @return Illuminate\Auth\Authenticatable | null
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if (count($credentials) == 0) return null;
+        if (count($credentials) == 0) {
+            return null;
+        }
 
-        $class = '\\'.ltrim($this->model, '\\');
-        $user = new $class;
+        $class = '\\' . ltrim($this->model, '\\');
+        $user  = new $class;
 
         $query = $user->newQuery();
-        foreach ($credentials as $key => $value)
-        {
-            if (!str_contains($key, 'password')) $query->where($key, $value);
+        foreach ($credentials as $key => $value) {
+            if (!str_contains($key, 'password')) {
+                $query->where($key, $value);
+            }
+
         }
-        
+
         return $query->first();
     }
 
     /**
      * Validate a user against the given credentials.
      *
-     * @param  \Illuminate\Auth\UserInterface $user
+     * @param  \Illuminate\Auth\Authenticatable $user
      * @param  array $credentials
      * @return bool
      */
-    public function validateCredentials(UserInterface $user, array $credentials)
+    public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        if ($user->type == 'local')
-        {
+        if ($user->type == 'local') {
             $plain = $credentials['password'];
             return $this->hasher->check($plain, $user->getAuthPassword());
         }
-        else
-        {
-            return true;
-        }
+        return true;
     }
-    
+
     /**
      * Update the "remember me" token for the given user in storage.
      *
-     * @param  \Illuminate\Auth\UserInterface  $user
+     * @param  \Illuminate\Auth\Authenticatable  $user
      * @param  string  $token
      * @return void
      */
-    public function updateRememberToken(UserInterface $user, $token){}
+    public function updateRememberToken(Authenticatable $user, $token)
+    {
+        // Not Implemented
+    }
 
     /**
      * Retrieve a user by by their unique identifier and "remember me" token.
      *
      * @param  mixed  $identifier
      * @param  string  $token
-     * @return \Illuminate\Auth\UserInterface|null
+     * @return \Illuminate\Auth\Authenticatable | null
      */
-    public function retrieveByToken($identifier, $token){}
+    public function retrieveByToken($identifier, $token)
+    {
+        // Not Implemented
+    }
 }

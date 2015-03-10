@@ -1,7 +1,13 @@
 Laravel Shibboleth Service Provider
 ===================================
 
-This package provides an easy way to implement Shibboleth Authentication for Laravel.
+This package provides an easy way to implement Shibboleth Authentication for Laravel 5.
+
+** Please Note **
+
+This is still a work in progress. Do not use in production!
+
+** Seriously, read that note! **
 
 **Please Note**
 In order to use this plugin, we assume you already have a pre-existing Shibboleth SP and Shibboleth IdP configured. This does not go into explaining how to set that up. I recommend [http://www.google.com/](http://www.google.com/ "Google"), they've got some pretty cool things.
@@ -14,28 +20,40 @@ Include the following in your `composer.json` file and run `composer update` (or
 
 
     {
-    	"require": {
-    		"saitswebuwm/shibboleth": "dev-master"
-    	}
+        "require": {
+            "saitswebuwm/shibboleth": "dev-master"
+        }
     }
 
 Then, you will want to include the following line in the end of your `/app/config/app.php` file in the `Providers` array.
 
-	'Saitswebuwm\Shibboleth\ShibbolethServiceProvider'
+    'Saitswebuwm\Shibboleth\ShibbolethServiceProvider'
 
-Also add the following array to your `User` model in `/app/models/User.php`
+Add this to your config/auth.php
 
-	protected $fillable = array('email', 'first_name', 'last_name', 'password', 'type');
+    /*
+    |--------------------------------------------------------------------------
+    | Group Model
+    | --------------------------------------------------------------------------
+    |
+    | When using the "shibboleth" authentication driver, it requires that a
+    | group model is supported. Of course, it is often just the "Group" model
+    | but you may use whatever you like.
+    |
+    */
+    
+    'group_model' => 'App\Group',
+
+This includes migrations for both a User and Group table, and will create the models for you. ADD MORE HERE?
 
 Now all your file changes are (mostly) ready. Run the following two commands to create the needed database tables and configuration files.
 
-	$ php artisan config:publish saitswebuwm/shibboleth
-	$ php artisan migrate --package="saitswebuwm/shibboleth"
-	$ php artisan view:publish saitswebuwm/shibboleth
+    $ php artisan vendor:publish
+    $ php artisan migrate
 
-Once this is done, you can activate the Shibboleth driver in your `/app/config/auth.php` file.
+Once this is done, you can activate the Shibboleth driver in your `/config/auth.php` file.
 
-	'driver' => 'shibboleth'
+    'driver' => 'shibboleth'
 
 You will need to configure your `.htaccess` or other web server configurations with whatever your setup involves. By default, we have included a `.htaccess` in the `/src/` directory that will allow for both Shibboleth and non-Shibboleth users to view the application.
 
