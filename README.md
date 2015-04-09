@@ -15,7 +15,7 @@ Include the following in your `composer.json` file and run `composer update` (or
 
     {
     	"require": {
-    		"saitswebuwm/shibboleth": "dev-master"
+    		"saitswebuwm/shibboleth": "0.5.7"
     	}
     }
 
@@ -40,6 +40,14 @@ Once this is done, you can activate the Shibboleth driver in your `/app/config/a
 You will need to configure your `.htaccess` or other web server configurations with whatever your setup involves. By default, we have included a `.htaccess` in the `/src/` directory that will allow for both Shibboleth and non-Shibboleth users to view the application.
 
 ## Recent Changes ##
+
+### v0.5.7 ###
+
+- Replace using Sessions to store user data to providing a token back to the Shibboleth view as a GET parameter so that we can more easily do CORS. This was already implemented in v1.0.0 but brought down to this version.
+
+### v0.5.6 ###
+
+- Allow choosing whether or not Shibboleth users are created on login
 
 ### v0.5.5 ###
 

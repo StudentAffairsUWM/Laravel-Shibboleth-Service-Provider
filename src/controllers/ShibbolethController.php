@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use JWTAuth;
 
 class ShibbolethController extends Controller {
 
@@ -60,6 +61,7 @@ class ShibbolethController extends Controller {
 	/**
 	 * Authorize function for users not using the IdP
 	 */
+	// TODO: Update this with JWT stuff
 	public function localAuthorize() {
 		$email    = \Input::get(Config::get("$this->cpath.local_login_user_field"));
 		$password = \Input::get(Config::get("$this->cpath.local_login_pass_field"));
@@ -124,43 +126,24 @@ class ShibbolethController extends Controller {
 		// Attempt to login with the email, if success, update the user model
 		// with data from the Shibboleth headers (if present)
 		if (Auth::attempt(array('email' => $email), true)) {
+			$user = UserShibboleth::where('email', '=', $email)->first();
+
 			if (isset($first_name)) {
-				Session::put('first', $first_name);
+				$user->first_name = $first_name;
 			}
 
 			if (isset($last_name)) {
-				Session::put('last', $last_name);
+				$user->last_name = $last_name;
 			}
 
-			if (isset($email)) {
-				Session::put('email', $email);
-			}
+			$user->save();
 
-			if (isset($email)) {
-				Session::put('id', UserShibboleth::where('email', '=', $email)->first()->id);
-			}
-			//TODO: Check this
+			$customClaims = ['auth_type' => 'idp'];
+            $token        = JWTAuth::fromUser($user, $customClaims);
 
-			//Group Session Field
-			if (isset($email)) {
-				try
-				{
-					$group = Group::whereHas('users', function ($q) {
-						$q->where('email', '=', $this->getServerVariable(Config::get("$this->cpath.idp_login_email")));
-					})->first();
-
-					Session::put('group', $group->name);
-				} catch (Exception $e) {
-					// TODO: Remove later after all auth is set up.
-					Session::put('group', 'undefined');
-				}
-			}
-
-			//Set session to know user is idp
-			Session::put('auth_type', 'idp');
 
 			//Check if route exists else redirect
-			return $this->viewOrRedirect(Config::get("$this->cpath.shibboleth_view"));
+			return $this->viewOrRedirect(Config::get("$this->cpath.shibboleth_view") . '?token=' . $token);
 
 		} else {
 			//Add user to group and send through auth.
@@ -210,6 +193,9 @@ class ShibbolethController extends Controller {
 	 */
 	public function destroy() {
 		Auth::logout();
+		Session::flush();
+
+		$token = JWTAuth::invalidate($_GET['token']);
 
 		if (Session::get('auth_type') == 'idp') {
 			if (Config::get("$this->cpath.emulate_idp") == true) {
