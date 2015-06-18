@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
+use JWTAuth;
 
 class ShibbolethController extends Controller
 {
@@ -78,6 +79,7 @@ class ShibbolethController extends Controller
      */
     public function localAuthorize()
     {
+        // TODO: Update this with the JWT stuff
         $email    = Input::get(config('shibboleth.local_login_user_field'));
         $password = Input::get(config('shibboleth.local_login_pass_field'));
 
@@ -141,7 +143,7 @@ class ShibbolethController extends Controller
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
         // TODO: This can be simplified a lot
-        if (Auth::attempt(array('email' => $email), true)) {
+        if (Auth::attempt(array('email' => $email, 'type' => 'shibboleth'), true)) {
             $user = $userClass::where('email', '=', $email)->first();
 
             // Update the modal as necessary
@@ -155,31 +157,13 @@ class ShibbolethController extends Controller
 
             $user->save();
 
-            // Populate the session as needed
-            Session::put('first', $user->first_name);
-            Session::put('last', $user->last_name);
-            Session::put('email', $user->email);
-            Session::put('id', $user->id);
-            Session::put('auth_type', 'idp');
+            // This is where we used to setup a session. Now we will setup a token.
+            $customClaims = ['auth_type' => 'idp'];
+            $token        = JWTAuth::fromUser($user, $customClaims);
 
-            // Now let's handle groups
-            $groups = $user->groups->toArray();
-
-            // For all groups
-            Session::put('groups', $groups);
-
-            // Handle situations where we just want one group info
-            if (count($groups) > 0) {
-                // For single groups, or the "Primary" group
-                Session::put('group_id', $groups[0]['id']);
-                Session::put('group_name', $groups[0]['name']);
-                // Backwards compatibility
-                Session::put('group', $groups[0]['name']);
-            } else {
-                Session::put('group', 'undefined');
-            }
-
-            return $this->viewOrRedirect(config('shibboleth.shibboleth_authenticated'));
+            // We need to pass the token... how?
+            // Let's try this.
+            return $this->viewOrRedirect(config('shibboleth.shibboleth_authenticated') . '?token=' . $token);
 
         } else {
             //Add user to group and send through auth.
@@ -220,8 +204,11 @@ class ShibbolethController extends Controller
      */
     public function destroy()
     {
+        // TODO: Should get the user from token here
         Auth::logout();
         Session::flush();
+
+        $token = JWTAuth::invalidate($_GET['token']);
 
         if (Session::get('auth_type') == 'idp') {
             if (config('shibboleth.emulate_idp') == true) {
@@ -368,10 +355,6 @@ class ShibbolethController extends Controller
      */
     private function viewOrRedirect($view)
     {
-        if (View::exists($view)) {
-            return view($view);
-        }
-
-        return Redirect::to($view);
+        return (View::exists($view)) ? view($view) : Redirect::to($view);
     }
 }
