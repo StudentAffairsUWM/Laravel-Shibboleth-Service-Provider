@@ -1,4 +1,5 @@
-<?php namespace StudentAffairsUwm\Shibboleth\Controllers;
+<?php
+namespace StudentAffairsUwm\Shibboleth\Controllers;
 
 use Illuminate\Auth\GenericUser;
 use Illuminate\Routing\Controller;
@@ -176,7 +177,13 @@ class ShibbolethController extends Controller
                         'last_name'  => $last_name,
                         'enabled'    => 0,
                     ));
-                    $group = $groupClass::find(config('shibboleth.shibboleth_group'));
+
+                    try {
+                        $group = $groupClass::findOrFail(config('shibboleth.shibboleth_group'));
+                    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                        $msg = "Could not find " . $groupClass . " with primary key " . config('shibboleth.shibboleth_group') . "! Check your Laravel-Shibboleth configuration.";
+                        throw new \RuntimeException($msg, 900, $e);
+                    }
 
                     $group->users()->save($user);
 
@@ -292,7 +299,7 @@ class ShibbolethController extends Controller
                     <h2 class="title">Login to Continue</h2>
                     <form action="" method="post" style="color: grey;">
                         <input type="hidden" name="_token" value="<?php echo csrf_token();?>">
-                        <?=(isset($error)) ? ('<p><em>' . $error . '</em></p>') : ''?>
+                        <?=(isset($error)) ? ('<p><em>' . $error . '</em></p>') : '';?>
                         <p>
                             <label for="username">Username</label>
                             <input type="text" name="username" id="username" style="width: 100%; padding: 5px; border-radius: 5px; border: 1px solid #cdcdcd;" />
