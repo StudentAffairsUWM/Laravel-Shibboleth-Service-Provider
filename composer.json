@@ -1,7 +1,7 @@
 {
     "name": "studentaffairsuwm/shibboleth",
     "description": "Enable basic Shibboleth support for Laravel 5.",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "authors": [
         {
             "name": "Christopher Maio",
