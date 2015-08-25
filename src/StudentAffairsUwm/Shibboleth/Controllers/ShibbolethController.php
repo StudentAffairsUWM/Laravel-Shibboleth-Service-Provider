@@ -160,7 +160,7 @@ class ShibbolethController extends Controller
 
             // This is where we used to setup a session. Now we will setup a token.
             $customClaims = ['auth_type' => 'idp'];
-            $token        = JWTAuth::fromUser($user, $customClaims);
+            $token        = JWTAuth::customClaims($customClaims)->fromUser($user);
 
             // We need to pass the token... how?
             // Let's try this.
