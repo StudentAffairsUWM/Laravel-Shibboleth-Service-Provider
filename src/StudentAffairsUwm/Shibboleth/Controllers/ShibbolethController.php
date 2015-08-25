@@ -213,11 +213,16 @@ class ShibbolethController extends Controller
     {
         // TODO: Should get the user from token here
         Auth::logout();
+        $authType = Session::get('auth_type')
         Session::flush();
 
-        $token = JWTAuth::invalidate($_GET['token']);
+        if (is_null($authType)) {
+            JWTAuth::parseToken();
+            $authType = JWTAuth::getPayload()->get('auth_type');
+        }
+        JWTAuth::invalidate();
 
-        if (Session::get('auth_type') == 'idp') {
+        if ($authType == 'idp') {
             if (config('shibboleth.emulate_idp') == true) {
                 return Redirect::to(action($this->ctrpath . 'emulateLogout'));
             } else {
