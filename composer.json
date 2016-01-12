@@ -1,7 +1,7 @@
 {
     "name": "studentaffairsuwm/shibboleth",
     "description": "Enable basic Shibboleth support for Laravel 5.",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "authors": [
         {
             "name": "Christopher Maio",
@@ -10,6 +10,10 @@
         {
             "name": "Michael Schuett",
             "email": "michaeljs1990@gmail.com"
+        },
+        {
+            "name": "Taylor Donald Harvey Smith",
+            "email": "smit2482@uwm.edu"
         }
     ],
     "require": {
