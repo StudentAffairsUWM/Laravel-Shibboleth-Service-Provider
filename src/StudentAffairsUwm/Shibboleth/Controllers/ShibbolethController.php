@@ -59,12 +59,12 @@ class ShibbolethController extends Controller
      * Create the session, send the user away to the IDP
      * for authentication.
      */
-    public function create()
+    public function create(Request $r)
     {
         if (config('shibboleth.emulate_idp') == true) {
             return Redirect::to(action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
         } else {
-            return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+            return Redirect::to('https://' . $r->server('SERVER_NAME') . ':' . $r->server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
         }
     }
 
@@ -111,7 +111,7 @@ class ShibbolethController extends Controller
             if (isset($email)) {
                 try {
                     $group = $groupClass::whereHas('users', function ($q) {
-                        $q->where('email', '=', Request::server(config('shibboleth.idp_login_email')));
+                        $q->where('email', '=', $r->server(config('shibboleth.idp_login_email')));
                     })->first();
 
                     Session::put('group', $group->name);
@@ -192,7 +192,7 @@ class ShibbolethController extends Controller
                     if (config('shibboleth.emulate_idp') == true) {
                         return Redirect::to(action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
                     } else {
-                        return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+                        return Redirect::to('https://' . $r->server('SERVER_NAME') . ':' . $r->server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
                     }
                 } else {
                     // Identify that the user was not in our database and will not be created (despite passing IdP)
@@ -222,7 +222,7 @@ class ShibbolethController extends Controller
             if (config('shibboleth.emulate_idp') == true) {
                 return Redirect::to(action($this->ctrpath . 'emulateLogout'));
             } else {
-                return Redirect::to('https://' . Request::server('SERVER_NAME') . config('shibboleth.idp_logout'));
+                return Redirect::to('https://' . $r->server('SERVER_NAME') . config('shibboleth.idp_logout'));
             }
         } else {
             return $this->viewOrRedirect(config('shibboleth.local_logout'));
@@ -351,8 +351,8 @@ class ShibbolethController extends Controller
         if (config('shibboleth.emulate_idp') == true) {
             return isset($_SERVER[$variableName]) ? $_SERVER[$variableName] : null;
         } else {
-            $nonRedirect = Request::server($variableName);
-            $redirect    = Request::server('REDIRECT_' . $variableName);
+            $nonRedirect = $r->server($variableName);
+            $redirect    = $r->server('REDIRECT_' . $variableName);
             return (!empty($nonRedirect)) ? $nonRedirect : $redirect;
         }
     }
