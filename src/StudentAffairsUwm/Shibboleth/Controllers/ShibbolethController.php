@@ -133,11 +133,11 @@ class ShibbolethController extends Controller
      * Setup authorization based on returned server variables
      * from the IdP.
      */
-    public function idpAuthorize()
+    public function idpAuthorize(Request $r)
     {
-        $email      = $this->getServerVariable(config('shibboleth.idp_login_email'));
-        $first_name = $this->getServerVariable(config('shibboleth.idp_login_first'));
-        $last_name  = $this->getServerVariable(config('shibboleth.idp_login_last'));
+        $email      = $this->getServerVariable($r, config('shibboleth.idp_login_email'));
+        $first_name = $this->getServerVariable($r, config('shibboleth.idp_login_first'));
+        $last_name  = $this->getServerVariable($r, config('shibboleth.idp_login_last'));
 
         $userClass  = config('auth.model');
         $groupClass = config('auth.group_model');
@@ -232,9 +232,9 @@ class ShibbolethController extends Controller
     /**
      * Emulate a login via Shibalike
      */
-    public function emulateLogin()
+    public function emulateLogin(Request $r)
     {
-        $from = (Input::get('target') != null) ? Input::get('target') : $this->getServerVariable('HTTP_REFERER');
+        $from = (Input::get('target') != null) ? Input::get('target') : $this->getServerVariable($r, 'HTTP_REFERER');
 
         $this->sp->makeAuthRequest($from);
         $this->sp->redirect();
@@ -243,10 +243,10 @@ class ShibbolethController extends Controller
     /**
      * Emulate a logout via Shibalike
      */
-    public function emulateLogout()
+    public function emulateLogout(Request $r)
     {
         $this->sp->logout();
-        die('Goodbye, fair user. <a href="' . $this->getServerVariable('HTTP_REFERER') . '">Return from whence you came</a>!');
+        die('Goodbye, fair user. <a href="' . $this->getServerVariable($r, 'HTTP_REFERER') . '">Return from whence you came</a>!');
     }
 
     /**
@@ -346,7 +346,7 @@ class ShibbolethController extends Controller
      * using the emulated IdP or a real one, we use the
      * appropriate function.
      */
-    private function getServerVariable($variableName)
+    private function getServerVariable($r, $variableName)
     {
         if (config('shibboleth.emulate_idp') == true) {
             return isset($_SERVER[$variableName]) ? $_SERVER[$variableName] : null;
