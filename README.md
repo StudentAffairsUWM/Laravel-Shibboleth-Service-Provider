@@ -19,7 +19,7 @@ Include the following in your `composer.json` file and run `composer update` (or
 
     {
         "require": {
-            "studentaffairsuwm/shibboleth": "1.0.0"
+            "studentaffairsuwm/shibboleth": "1.0.4"
         }
     }
 
@@ -39,7 +39,7 @@ You'll also want to add this to your `/config/auth.php` file.
     | but you may use whatever you like.
     |
     */
-    
+
     'group_model' => 'App\Group',
 
 Finally, we just need to publish to include some default models, the database migrations, and the configuration file in your project. We include migrations for a simple user and group table, it is up to you to expand upon those.
