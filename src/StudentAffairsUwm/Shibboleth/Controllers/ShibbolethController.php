@@ -9,14 +9,11 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
-use Illuminate\Http\Request;
+use Illuminate\Console\AppNamespaceDetectorTrait;
 use JWTAuth;
 
 class ShibbolethController extends Controller
 {
-    // TODO: Can we get rid of this and get it more dynamically?
-    private $ctrpath = "\StudentAffairsUwm\\Shibboleth\\Controllers\\ShibbolethController@";
-
     /**
      * Service Provider
      * @var Shibalike\SP
@@ -59,12 +56,12 @@ class ShibbolethController extends Controller
      * Create the session, send the user away to the IDP
      * for authentication.
      */
-    public function create(Request $r)
+    public function create()
     {
         if (config('shibboleth.emulate_idp') == true) {
-            return Redirect::to(action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . "@idpAuthorize"));
         } else {
-            return Redirect::to('https://' . $r->server('SERVER_NAME') . ':' . $r->server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+            return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
         }
     }
 
@@ -81,51 +78,24 @@ class ShibbolethController extends Controller
      */
     public function localAuthorize()
     {
-        // TODO: Update this with the JWT stuff
         $email    = Input::get(config('shibboleth.local_login_user_field'));
         $password = Input::get(config('shibboleth.local_login_pass_field'));
 
-        if (Auth::attempt(array('email' => $email, 'password' => $password), true)) {
-            $userClass  = config('auth.model');
-            $groupClass = config('auth.group_model');
+        $userClass  = config('auth.model');
+        $groupClass = config('auth.group_model');
 
+        if (Auth::attempt(array('email' => $email, 'password' => $password, 'type' => 'local'), true)) {
             $user = $userClass::where('email', '=', $email)->first();
-            if (isset($user->first_name)) {
-                Session::put('first', $user->first_name);
-            }
 
-            if (isset($user->last_name)) {
-                Session::put('last', $user->last_name);
-            }
+            // This is where we used to setup a session. Now we will setup a token.
+            $customClaims = ['auth_type' => 'local'];
+            $token        = JWTAuth::fromUser($user, $customClaims);
 
-            if (isset($email)) {
-                Session::put('email', $user->email);
-            }
-
-            if (isset($email)) {
-                Session::put('id', User::where('email', '=', $email)->first()->id);
-            }
-            //TODO: Look at this
-
-            //Group Session Field
-            if (isset($email)) {
-                try {
-                    $group = $groupClass::whereHas('users', function ($q) {
-                        $q->where('email', '=', $r->server(config('shibboleth.idp_login_email')));
-                    })->first();
-
-                    Session::put('group', $group->name);
-                } catch (Exception $e) {
-                    // TODO: Remove later after all auth is set up.
-                    Session::put('group', 'undefined');
-                }
-            }
-
-            // Set session to know user is local
-            Session::put('auth_type', 'local');
-            return $this->viewOrRedirect(config('shibboleth.local_authorized'));
+            // We need to pass the token... how?
+            // Let's try this.
+            return $this->viewOrRedirect(config('shibboleth.local_authenticated') . '?token=' . $token);
         } else {
-            return $this->viewOrRedirect(config('shibboleth.local_unauthorized'));
+            return $this->viewOrRedirect(config('shibboleth.local_failed'));
         }
     }
 
@@ -133,11 +103,11 @@ class ShibbolethController extends Controller
      * Setup authorization based on returned server variables
      * from the IdP.
      */
-    public function idpAuthorize(Request $r)
+    public function idpAuthorize()
     {
-        $email      = $this->getServerVariable($r, config('shibboleth.idp_login_email'));
-        $first_name = $this->getServerVariable($r, config('shibboleth.idp_login_first'));
-        $last_name  = $this->getServerVariable($r, config('shibboleth.idp_login_last'));
+        $email      = $this->getServerVariable(config('shibboleth.idp_login_email'));
+        $first_name = $this->getServerVariable(config('shibboleth.idp_login_first'));
+        $last_name  = $this->getServerVariable(config('shibboleth.idp_login_last'));
 
         $userClass  = config('auth.model');
         $groupClass = config('auth.group_model');
@@ -190,11 +160,12 @@ class ShibbolethController extends Controller
 
                     // this is simply brings us back to the session-setting branch directly above
                     if (config('shibboleth.emulate_idp') == true) {
-                        return Redirect::to(action($this->ctrpath . 'emulateLogin') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+                        return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
                     } else {
-                        return Redirect::to('https://' . $r->server('SERVER_NAME') . ':' . $r->server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action($this->ctrpath . "idpAuthorize"));
+                        return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
                     }
                 } else {
+                    // TODO: This is old... it will just cause redirect loops.
                     // Identify that the user was not in our database and will not be created (despite passing IdP)
                     Session::put('auth_type', 'no_user');
                     Session::put('group', 'undefined');
@@ -212,17 +183,20 @@ class ShibbolethController extends Controller
      */
     public function destroy()
     {
-        // TODO: Should get the user from token here
+        $token = JWTAuth::parseToken();
+
+        $user = JWTAuth::toUser($token);
+        $payload = $token->getPayload();
+
         Auth::logout();
         Session::flush();
+        $token->invalidate();
 
-        $token = JWTAuth::invalidate($_GET['token']);
-
-        if (Session::get('auth_type') == 'idp') {
+        if ($payload->get('auth_type') == 'idp') {
             if (config('shibboleth.emulate_idp') == true) {
-                return Redirect::to(action($this->ctrpath . 'emulateLogout'));
+                return Redirect::to(action('\\' . __CLASS__ . '@emulateLogout'));
             } else {
-                return Redirect::to('https://' . $r->server('SERVER_NAME') . config('shibboleth.idp_logout'));
+                return Redirect::to('https://' . Request::server('SERVER_NAME') . config('shibboleth.idp_logout'));
             }
         } else {
             return $this->viewOrRedirect(config('shibboleth.local_logout'));
@@ -232,9 +206,9 @@ class ShibbolethController extends Controller
     /**
      * Emulate a login via Shibalike
      */
-    public function emulateLogin(Request $r)
+    public function emulateLogin()
     {
-        $from = (Input::get('target') != null) ? Input::get('target') : $this->getServerVariable($r, 'HTTP_REFERER');
+        $from = (Input::get('target') != null) ? Input::get('target') : $this->getServerVariable('HTTP_REFERER');
 
         $this->sp->makeAuthRequest($from);
         $this->sp->redirect();
@@ -243,10 +217,10 @@ class ShibbolethController extends Controller
     /**
      * Emulate a logout via Shibalike
      */
-    public function emulateLogout(Request $r)
+    public function emulateLogout()
     {
         $this->sp->logout();
-        die('Goodbye, fair user. <a href="' . $this->getServerVariable($r, 'HTTP_REFERER') . '">Return from whence you came</a>!');
+        die('Goodbye, fair user. <a href="' . $this->getServerVariable('HTTP_REFERER') . '">Return from whence you came</a>!');
     }
 
     /**
@@ -254,69 +228,22 @@ class ShibbolethController extends Controller
      */
     public function emulateIdp()
     {
+        $data = [];
+
         if (Input::get('username') != null) {
-            $username = '';
-            if (Input::get('username') === Input::get('password')) {
-                $username = Input::get('username');
-            }
+            $username = (Input::get('username') === Input::get('password')) ?
+                Input::get('username') : '';
 
             $userAttrs = $this->idp->fetchAttrs($username);
             if ($userAttrs) {
                 $this->idp->markAsAuthenticated($username);
                 $this->idp->redirect();
-            } else {
-                $error = 'Sorry. You failed to authenticate. <a href="idp" alt="Try Again">Try again</a>';
             }
+
+            $data['error'] = 'Incorrect username and/or password';
         }
-        ?>
 
-        <html>
-            <head>
-                <title>Emulated IdP Login</title>
-                <style type="text/css">
-                    body {
-                        font-family: sans-serif;
-                    }
-                    .title {
-                        text-align: center;
-                        font-weight: 200;
-                        color: grey;
-                    }
-                    input[type="submit"] {
-                        padding: 10px;
-                        border: 1px solid #cdcdcd;
-                        border-radius: 5px;
-                        background-color: #fff;
-                        min-width: 100%;
-                    }
-                    input[type="submit"]:hover {
-                        background-color: #cdcdcd;
-                        cursor: pointer;
-                    }
-                </style>
-            </head>
-            <body>
-                <div style="margin: 10px auto; width: 100%; border: 1px solid grey; border-radius: 5px; padding: 10px; max-width: 400px; min-width: 300px;">
-                    <h2 class="title">Login to Continue</h2>
-                    <form action="" method="post" style="color: grey;">
-                        <input type="hidden" name="_token" value="<?php echo csrf_token();?>">
-                        <?=(isset($error)) ? ('<p><em>' . $error . '</em></p>') : '';?>
-                        <p>
-                            <label for="username">Username</label>
-                            <input type="text" name="username" id="username" style="width: 100%; padding: 5px; border-radius: 5px; border: 1px solid #cdcdcd;" />
-                        </p>
-                        <p>
-                            <label for="password">Password</label>
-                            <input type="password" name="password" id="password" style="width: 100%; padding: 5px; border-radius: 5px; border: 1px solid #cdcdcd;" />
-                        </p>
-                        <p><input type="submit" value="Login"></p>
-                    </form>
-                </div>
-            </div>
-        </html>
-
-        <?php
-
+        return view('IdpLogin', $data);
     }
 
     /**
@@ -346,14 +273,15 @@ class ShibbolethController extends Controller
      * using the emulated IdP or a real one, we use the
      * appropriate function.
      */
-    private function getServerVariable($r, $variableName)
+    private function getServerVariable($variableName)
     {
         if (config('shibboleth.emulate_idp') == true) {
-            return isset($_SERVER[$variableName]) ? $_SERVER[$variableName] : null;
+            return isset($_SERVER[$variableName]) ?
+                $_SERVER[$variableName] : null;
         } else {
-            $nonRedirect = $r->server($variableName);
-            $redirect    = $r->server('REDIRECT_' . $variableName);
-            return (!empty($nonRedirect)) ? $nonRedirect : $redirect;
+            return (!empty(Request::server($variableName))) ?
+                Request::server($variableName) :
+                Request::server('REDIRECT_' . $variableName);;
         }
     }
 

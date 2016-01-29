@@ -2,17 +2,10 @@
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider as UserProviderInterface;
-use Illuminate\Hashing\BcryptHasher;
+use Hash;
 
 class ShibbolethUserProvider implements UserProviderInterface
 {
-    /**
-     * The hasher implementation.
-     *
-     * @var \Illuminate\Hashing\BcryptHasher
-     */
-    protected $hasher;
-
     /**
      * The user model.
      *
@@ -23,14 +16,12 @@ class ShibbolethUserProvider implements UserProviderInterface
     /**
      * Create a new Shibboleth user provider.
      *
-     * @param  \Illuminate\Hashing\BcryptHasher  $hasher
      * @param  string  $model
      * @return void
      */
-    public function __construct(BcryptHasher $hasher, $model)
+    public function __construct($model)
     {
         $this->model  = $model;
-        $this->hasher = $hasher;
     }
 
     /**
@@ -42,7 +33,8 @@ class ShibbolethUserProvider implements UserProviderInterface
     public function retrieveById($identifier)
     {
         $user = $this->retrieveByCredentials(['id' => $identifier]);
-        return ($user && $user->getAuthIdentifier() == $identifier) ? $user : null;
+        return ($user && $user->getAuthIdentifier() == $identifier) ?
+            $user : null;
     }
 
     /**
@@ -65,7 +57,6 @@ class ShibbolethUserProvider implements UserProviderInterface
             if (!str_contains($key, 'password')) {
                 $query->where($key, $value);
             }
-
         }
 
         return $query->first();
@@ -78,10 +69,10 @@ class ShibbolethUserProvider implements UserProviderInterface
      * @param  array $credentials
      * @return bool
      */
-    public function validateCredentials(Authenticatable $user, array $credentials)
+    public function validateCredentials(Authenticatable $user, array $creds)
     {
-        return ($credentials['type'] === 'shibboleth') 
-            ? true : $this->hasher->check($credentials['password'], $user->getAuthPassword());
+        return ($creds['type'] === 'shibboleth')
+            ? true : Hash::check($creds['password'], $user->getAuthPassword());
     }
 
     /**
