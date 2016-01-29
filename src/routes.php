@@ -1,6 +1,6 @@
 <?php
 
-// Login Route (Shibboleth and Local)
+// Login Route (Shibboleth)
 Route::get('/login', 'StudentAffairsUwm\Shibboleth\Controllers\ShibbolethController@create');
 // Logout Route (Shibboleth and Local)
 Route::get('/logout', 'StudentAffairsUwm\Shibboleth\Controllers\ShibbolethController@destroy');
