@@ -19,7 +19,7 @@ Include the following in your `composer.json` file and run `composer update` (or
 
     {
         "require": {
-            "studentaffairsuwm/shibboleth": "1.0.8"
+            "studentaffairsuwm/shibboleth": "1.0.9"
         }
     }
 
