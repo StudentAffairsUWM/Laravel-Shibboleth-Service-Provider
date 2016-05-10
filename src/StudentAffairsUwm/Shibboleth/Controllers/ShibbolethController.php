@@ -40,7 +40,7 @@ class ShibbolethController extends Controller
     {
         if (config('shibboleth.emulate_idp') == true) {
             $this->config         = new \Shibalike\Config();
-            $this->config->idpUrl = 'idp';
+            $this->config->idpUrl = '/emulated/idp';
 
             $stateManager = $this->getStateManager();
 
@@ -238,7 +238,7 @@ class ShibbolethController extends Controller
             $userAttrs = $this->idp->fetchAttrs($username);
             if ($userAttrs) {
                 $this->idp->markAsAuthenticated($username);
-                $this->idp->redirect();
+                $this->idp->redirect('/idp');
             }
 
             $data['error'] = 'Incorrect username and/or password';
