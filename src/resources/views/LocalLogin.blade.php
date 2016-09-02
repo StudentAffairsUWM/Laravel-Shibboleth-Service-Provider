@@ -46,7 +46,13 @@
             <h2 class="title">Login to Continue</h2>
             <form action="/local" method="post">
                 <input type="hidden" name="_token" value="<?php echo csrf_token();?>">
-                <strong>{{ $error or "Please login below." }}</strong>
+                @if(Session::has('message'))
+                  <p class="alert alert-info">
+                    {{ Session::get('message') }}
+                  </p>
+                @else
+                  <strong>Please login below</strong>
+                @endif
                 <p>
                     <label for="email">Username</label>
                     <input type="email" name="email" id="email" />

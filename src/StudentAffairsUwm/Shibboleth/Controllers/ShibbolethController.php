@@ -96,7 +96,8 @@ class ShibbolethController extends Controller
             // Let's try this.
             return $this->viewOrRedirect(config('shibboleth.local_authenticated') . '?token=' . $token);
         } else {
-            return $this->viewOrRedirect(config('shibboleth.local_failed'));
+            Session::flash('message', 'Invalid email or password.');
+            return $this->viewOrRedirect(config('shibboleth.local_login'));
         }
     }
 
@@ -174,8 +175,6 @@ class ShibbolethController extends Controller
                     return $this->viewOrRedirect(config('shibboleth.shibboleth_unauthorized'));
                 }
             }
-
-            return $this->viewOrRedirect(config('shibboleth.login_fail'));
         }
     }
 
@@ -282,7 +281,7 @@ class ShibbolethController extends Controller
         } else {
             return (!empty(Request::server($variableName))) ?
                 Request::server($variableName) :
-                Request::server('REDIRECT_' . $variableName);;
+                Request::server('REDIRECT_' . $variableName);
         }
     }
 
