@@ -25,22 +25,26 @@ Include the following in your `composer.json` file and run `composer update` (or
 
 Then, append the following line inside your `/config/app.php` file within the `Providers` array.
 
-    'StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider'
+```php
+StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider::class,
+```
 
 You'll also want to add this to your `/config/auth.php` file.
 
-    /*
-    |--------------------------------------------------------------------------
-    | Group Model
-    | --------------------------------------------------------------------------
-    |
-    | When using the "shibboleth" authentication driver, it requires that a
-    | group model is supported. Of course, it is often just the "Group" model
-    | but you may use whatever you like.
-    |
-    */
+```php
+/*
+|--------------------------------------------------------------------------
+| Group Model
+| --------------------------------------------------------------------------
+|
+| When using the "shibboleth" authentication driver, it requires that a
+| group model is supported. Of course, it is often just the "Group" model
+| but you may use whatever you like.
+|
+*/
 
-    'group_model' => 'App\Group',
+'group_model' => 'App\Group',
+```
 
 Finally, we just need to publish to include some default models, the database migrations, and the configuration file in your project. We include migrations for a simple user and group table, it is up to you to expand upon those.
 
@@ -51,7 +55,14 @@ Run the following commands to publish and then migrate your database:
 
 Once the migrations have run successfully, change the driver to `shibboleth` in your `/config/auth.php` file.
 
-    'driver' => 'shibboleth'
+```php
+'providers' => [
+	'users' => [
+		'driver' => 'shibboleth',
+		'model' => App\User::class,
+	],
+],
+```
 
 ## Looking for Laravel 4? ##
 
