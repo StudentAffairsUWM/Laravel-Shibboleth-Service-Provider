@@ -18,7 +18,7 @@ class ShibbolethServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app['auth']->extend('shibboleth', function ($app) {
+        $this->app['auth']->provider('shibboleth', function ($app) {
             return new Providers\ShibbolethUserProvider($this->app['config']['auth.model']);
         });
 
