@@ -15,13 +15,9 @@ In order to use this plugin, we assume you already have a pre-existing Shibbolet
 
 ## Installation ##
 
-Include the following in your `composer.json` file and run `composer update` (or `composer install` if it's a new project).
+Use [composer][1] to require the latest release into your project:
 
-    {
-        "require": {
-            "studentaffairsuwm/shibboleth": "1.1.1"
-        }
-    }
+    $ composer require saitswebuwm/shibboleth
 
 Then, append the following line inside your `/config/app.php` file within the `Providers` array.
 
@@ -67,3 +63,5 @@ Once the migrations have run successfully, change the driver to `shibboleth` in 
 ## Looking for Laravel 4? ##
 
 We have stopped development on the Laravel 4 version of this plugin for now. We are welcoming pull requests, however! Feel free to use any tag below 1.0.0 for Laravel 4 compatible versions.
+
+[1]:https://getcomposer.org/
