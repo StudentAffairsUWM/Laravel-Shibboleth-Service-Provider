@@ -29,7 +29,7 @@ class ShibbolethServiceProvider extends ServiceProvider
         $loader->alias('JWTFactory', JWTFactory::class);
 
         $this->app['auth']->provider('shibboleth', function ($app) {
-            return new Providers\ShibbolethUserProvider($this->app['config']['auth.model']);
+            return new Providers\ShibbolethUserProvider($this->app['config']['auth.providers.users.model']);
         });
 
         // Publish the configuration, migrations, and User / Group models

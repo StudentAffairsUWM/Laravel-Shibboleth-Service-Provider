@@ -82,8 +82,8 @@ class ShibbolethController extends Controller
         $email    = Input::get(config('shibboleth.local_login_user_field'));
         $password = Input::get(config('shibboleth.local_login_pass_field'));
 
-        $userClass  = config('auth.model');
-        $groupClass = config('auth.group_model');
+        $userClass  = config('auth.providers.users.model');
+        $groupClass = config('auth.providers.users.group_model');
 
         if (Auth::attempt(array('email' => $email, 'password' => $password, 'type' => 'local'), true)) {
             $user = $userClass::where('email', '=', $email)->first();
@@ -111,8 +111,8 @@ class ShibbolethController extends Controller
         $first_name = $this->getServerVariable(config('shibboleth.idp_login_first'));
         $last_name  = $this->getServerVariable(config('shibboleth.idp_login_last'));
 
-        $userClass  = config('auth.model');
-        $groupClass = config('auth.group_model');
+        $userClass  = config('auth.providers.users.model');
+        $groupClass = config('auth.providers.users.group_model');
 
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
