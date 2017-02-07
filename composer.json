@@ -20,7 +20,8 @@
         "php": ">=5.4.0",
         "illuminate/support": "5.*",
         "mrclay/shibalike": "1.0.0",
-        "laravel/framework": "^5.4"
+        "laravel/framework": "^5.4",
+        "tymon/jwt-auth": "^0.5.10"
     },
     "autoload": {
         "psr-4": {
