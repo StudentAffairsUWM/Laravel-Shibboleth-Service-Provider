@@ -5,6 +5,7 @@ use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Facades\JWTFactory;
 use Illuminate\Foundation\AliasLoader;
+use Illuminate\Support\Facades\Route;
 
 class ShibbolethServiceProvider extends ServiceProvider
 {
@@ -40,7 +41,9 @@ class ShibbolethServiceProvider extends ServiceProvider
             __DIR__ . '/Group.php'                   => base_path('/app/Group.php'),
         ]);
 
-        include __DIR__ . '/../../routes.php';
+        Route::group(['middleware' => 'web'], function ($router) {
+            require __DIR__ . '/../../routes.php';
+        });
     }
 
     /**
