@@ -86,7 +86,6 @@ class ShibbolethController extends Controller
         $password = Input::get(config('shibboleth.local_login_pass_field'));
 
         $userClass  = config('auth.providers.users.model');
-        $groupClass = config('auth.providers.users.group_model');
 
         if (Auth::attempt(array('email' => $email, 'password' => $password, 'type' => 'local'), true)) {
             $user = $userClass::where('email', '=', $email)->first();
@@ -192,7 +191,6 @@ class ShibbolethController extends Controller
     {
         $token = JWTAuth::parseToken();
 
-        $user = JWTAuth::toUser($token);
         $payload = $token->getPayload();
 
         Auth::logout();
