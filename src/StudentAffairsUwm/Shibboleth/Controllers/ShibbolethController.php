@@ -60,9 +60,12 @@ class ShibbolethController extends Controller
     public function create()
     {
         if (config('shibboleth.emulate_idp') == true) {
-            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . "@idpAuthorize"));
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
+                . '?target=' .  action('\\' . __CLASS__ . '@idpAuthorize'));
         } else {
-            return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
+            return Redirect::to('https://' . Request::server('SERVER_NAME')
+                . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+                . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
         }
     }
 
@@ -153,7 +156,9 @@ class ShibbolethController extends Controller
                     try {
                         $group = $groupClass::findOrFail(config('shibboleth.shibboleth_group'));
                     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-                        $msg = "Could not find " . $groupClass . " with primary key " . config('shibboleth.shibboleth_group') . "! Check your Laravel-Shibboleth configuration.";
+                        $msg = "Could not find " . $groupClass
+                            . " with primary key " . config('shibboleth.shibboleth_group')
+                            . "! Check your Laravel-Shibboleth configuration.";
                         throw new \RuntimeException($msg, 900, $e);
                     }
 
@@ -161,9 +166,12 @@ class ShibbolethController extends Controller
 
                     // this is simply brings us back to the session-setting branch directly above
                     if (config('shibboleth.emulate_idp') == true) {
-                        return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
+                        return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
+                            . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
                     } else {
-                        return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
+                        return Redirect::to('https://' . Request::server('SERVER_NAME')
+                            . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+                            . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
                     }
                 } else {
                     // TODO: This is old... it will just cause redirect loops.
@@ -219,7 +227,10 @@ class ShibbolethController extends Controller
     public function emulateLogout()
     {
         $this->sp->logout();
-        die('Goodbye, fair user. <a href="' . $this->getServerVariable('HTTP_REFERER') . '">Return from whence you came</a>!');
+
+        $referer = $this->getServerVariable('HTTP_REFERER');
+
+        die("Goodbye, fair user. <a href='$referer'>Return from whence you came</a>!");
     }
 
     /**
