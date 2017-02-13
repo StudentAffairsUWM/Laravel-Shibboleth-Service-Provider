@@ -162,17 +162,17 @@ class ShibbolethController extends Controller
             }
 
             $group->users()->save($user);
+        }
 
-            // this is simply brings us back to the session-setting branch directly above
-            if (config('shibboleth.emulate_idp') == true) {
-                return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
-                    . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
-            }
-
-            return Redirect::to('https://' . Request::server('SERVER_NAME')
-                . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+        // this is simply brings us back to the session-setting branch directly above
+        if (config('shibboleth.emulate_idp') == true) {
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
                 . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
         }
+
+        return Redirect::to('https://' . Request::server('SERVER_NAME')
+            . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+            . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
     }
 
     /**
