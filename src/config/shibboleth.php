@@ -12,7 +12,7 @@ return array(
     |
      */
 
-    'local_login'              => 'localLogin',
+    'local_login'              => 'LocalLogin',
     'local_logout'             => 'localLogout',
     'local_authorized'         => 'authed',
     'local_unauthorized'       => 'loginUnauthorized',
