@@ -138,7 +138,6 @@ class ShibbolethController extends Controller
             // We need to pass the token... how?
             // Let's try this.
             return $this->viewOrRedirect(config('shibboleth.shibboleth_authenticated') . '?token=' . $token);
-
         } else {
             //Add user to group and send through auth.
             if (isset($email)) {
