@@ -32,7 +32,7 @@ We include migrations for a simple user and group table, it is up to you to expa
 
 Run the following commands to publish and then migrate your database:
 
-    $ php artisan vendor:publish
+    $ php artisan vendor:publish --provider="StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider"
     $ php artisan migrate
 
 Once the migrations have run successfully, change the driver to `shibboleth` in your `/config/auth.php` file.
