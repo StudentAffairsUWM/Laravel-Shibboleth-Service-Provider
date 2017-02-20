@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Console\AppNamespaceDetectorTrait;
 use JWTAuth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ShibbolethController extends Controller
 {
@@ -154,7 +155,7 @@ class ShibbolethController extends Controller
 
             try {
                 $group = $groupClass::findOrFail(config('shibboleth.shibboleth_group'));
-            } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            } catch (ModelNotFoundException $e) {
                 $msg = "Could not find " . $groupClass
                     . " with primary key " . config('shibboleth.shibboleth_group')
                     . "! Check your Laravel-Shibboleth configuration.";
