@@ -1,9 +1,6 @@
 <?php namespace StudentAffairsUwm\Shibboleth;
 
 use Illuminate\Support\ServiceProvider;
-use Tymon\JWTAuth\Providers\JWTAuthServiceProvider;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Facades\JWTFactory;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\Route;
 
@@ -23,10 +20,10 @@ class ShibbolethServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->register(JWTAuthServiceProvider::class);
+        $this->app->register('Tymon\JWTAuth\Providers\JWTAuthServiceProvider');
         $loader = AliasLoader::getInstance();
-        $loader->alias('JWTAuth', JWTAuth::class);
-        $loader->alias('JWTFactory', JWTFactory::class);
+        $loader->alias('JWTAuth', 'Tymon\JWTAuth\Facades\JWTAuth');
+        $loader->alias('JWTFactory', 'Tymon\JWTAuth\Facades\JWTFactory');
 
         $this->app['auth']->provider('shibboleth', function ($app) {
             return new Providers\ShibbolethUserProvider($app['config']['auth.providers.users.model']);
