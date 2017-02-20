@@ -281,8 +281,10 @@ class ShibbolethController extends Controller
                 $_SERVER[$variableName] : null;
         }
 
-        return (!empty(Request::server($variableName))) ?
-            Request::server($variableName) :
+        $variable = Request::server($variableName);
+
+        return (!empty($variable)) ?
+            $variable :
             Request::server('REDIRECT_' . $variableName);
     }
 
