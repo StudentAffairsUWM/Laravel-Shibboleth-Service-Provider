@@ -4,6 +4,7 @@ Laravel Shibboleth Service Provider
 This package provides an easy way to implement Shibboleth Authentication for Laravel 5.4
 
 [![Code Climate][3]][2]
+[![Build Status][12]][11]
 
 ## Features ##
 
@@ -61,3 +62,5 @@ We have stopped development on the Laravel 4 version of this plugin for now. We 
 [1]:https://getcomposer.org/
 [2]:https://codeclimate.com/github/StudentAffairsUWM/Laravel-Shibboleth-Service-Provider
 [3]:https://codeclimate.com/github/StudentAffairsUWM/Laravel-Shibboleth-Service-Provider/badges/gpa.svg
+[11]:https://travis-ci.org/uawcob/Laravel-Shibboleth-Service-Provider
+[12]:https://travis-ci.org/uawcob/Laravel-Shibboleth-Service-Provider.svg?branch=master
