@@ -1,11 +1,14 @@
 Laravel Shibboleth Service Provider
 ===================================
 
-This package provides an easy way to implement Shibboleth Authentication for Laravel 5.
+This package provides an easy way to implement Shibboleth Authentication for Laravel 5.4
+
+[![Code Climate][3]][2]
+[![Build Status][12]][11]
 
 ## Features ##
 
-- Compatibility with Laravel 5
+- Compatibility with Laravel 5.4
 - Includes User and Group model examples
 - Ability to *emulate* an IdP (via [https://github.com/mrclay/shibalike](https://github.com/mrclay/shibalike "Shibalike"))
 
@@ -15,44 +18,49 @@ In order to use this plugin, we assume you already have a pre-existing Shibbolet
 
 ## Installation ##
 
-Include the following in your `composer.json` file and run `composer update` (or `composer install` if it's a new project).
+Use [composer][1] to require the latest release into your project:
 
-    {
-        "require": {
-            "studentaffairsuwm/shibboleth": "1.1.1"
-        }
-    }
+    $ composer require saitswebuwm/shibboleth
 
 Then, append the following line inside your `/config/app.php` file within the `Providers` array.
 
-    'StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider'
+```php
+StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider::class,
+```
 
-You'll also want to add this to your `/config/auth.php` file.
-
-    /*
-    |--------------------------------------------------------------------------
-    | Group Model
-    | --------------------------------------------------------------------------
-    |
-    | When using the "shibboleth" authentication driver, it requires that a
-    | group model is supported. Of course, it is often just the "Group" model
-    | but you may use whatever you like.
-    |
-    */
-
-    'group_model' => 'App\Group',
-
-Finally, we just need to publish to include some default models, the database migrations, and the configuration file in your project. We include migrations for a simple user and group table, it is up to you to expand upon those.
+Publish to include some default models, the database migrations, and the configuration file in your project.
+We include migrations for a simple user and group table, it is up to you to expand upon those.
 
 Run the following commands to publish and then migrate your database:
 
-    $ php artisan vendor:publish
+    $ php artisan vendor:publish --provider="StudentAffairsUwm\Shibboleth\ShibbolethServiceProvider"
     $ php artisan migrate
 
 Once the migrations have run successfully, change the driver to `shibboleth` in your `/config/auth.php` file.
 
-    'driver' => 'shibboleth'
+When using the "shibboleth" authentication driver, it requires that a
+group model is supported. Of course, it is often just the "Group" model
+but you may use whatever you like.
 
-## Looking for Laravel 4? ##
+
+```php
+'providers' => [
+    'users' => [
+        'driver'      => 'shibboleth',
+        'model'       => App\User::class,
+        'group_model' => App\Group::class,
+    ],
+],
+```
+
+## Looking for Laravel 5.0 or 4? ##
+
+Laravel 5.0 should be compatible up to tag 1.1.1
 
 We have stopped development on the Laravel 4 version of this plugin for now. We are welcoming pull requests, however! Feel free to use any tag below 1.0.0 for Laravel 4 compatible versions.
+
+[1]:https://getcomposer.org/
+[2]:https://codeclimate.com/github/StudentAffairsUWM/Laravel-Shibboleth-Service-Provider
+[3]:https://codeclimate.com/github/StudentAffairsUWM/Laravel-Shibboleth-Service-Provider/badges/gpa.svg
+[11]:https://travis-ci.org/uawcob/Laravel-Shibboleth-Service-Provider
+[12]:https://travis-ci.org/uawcob/Laravel-Shibboleth-Service-Provider.svg?branch=master

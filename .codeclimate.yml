@@ -1,0 +1,24 @@
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - php
+  fixme:
+    enabled: true
+  phpmd:
+    enabled: true
+    checks:
+      CleanCode/StaticAccess:
+        enabled: false
+    exclude_fingerprints:
+    - a4ec9f4b0df30973eebca122947f4196
+    - 6f274b8e520f7de37675bc05d07b11db
+    - 648ff6c03fbda93aaab2909cd4e4df63
+    - e1ecdf9a6a792d7defc26acd331c4e73
+    - 217e31816be68e68f07541a3c8c169b9
+    - 5e9e93ab7d175c80f0a0922dfbb69832
+    - 5d4fe8e1b5fc8c188b27012f3e1b68eb
+ratings:
+  paths:
+  - src/**

@@ -1,6 +1,8 @@
 <?php namespace StudentAffairsUwm\Shibboleth;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\AliasLoader;
+use Illuminate\Support\Facades\Route;
 
 class ShibbolethServiceProvider extends ServiceProvider
 {
@@ -18,8 +20,13 @@ class ShibbolethServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app['auth']->extend('shibboleth', function ($app) {
-            return new Providers\ShibbolethUserProvider($this->app['config']['auth.model']);
+        $this->app->register('Tymon\JWTAuth\Providers\JWTAuthServiceProvider');
+        $loader = AliasLoader::getInstance();
+        $loader->alias('JWTAuth', 'Tymon\JWTAuth\Facades\JWTAuth');
+        $loader->alias('JWTFactory', 'Tymon\JWTAuth\Facades\JWTFactory');
+
+        $this->app['auth']->provider('shibboleth', function ($app) {
+            return new Providers\ShibbolethUserProvider($app['config']['auth.providers.users.model']);
         });
 
         // Publish the configuration, migrations, and User / Group models
@@ -31,7 +38,9 @@ class ShibbolethServiceProvider extends ServiceProvider
             __DIR__ . '/Group.php'                   => base_path('/app/Group.php'),
         ]);
 
-        include __DIR__ . '/../../routes.php';
+        Route::group(['middleware' => 'web'], function () {
+            require __DIR__ . '/../../routes.php';
+        });
     }
 
     /**

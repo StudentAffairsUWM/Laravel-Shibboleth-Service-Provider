@@ -1,7 +1,6 @@
 {
     "name": "studentaffairsuwm/shibboleth",
     "description": "Enable basic Shibboleth support for Laravel 5.x",
-    "version": "1.1.1",
     "authors": [
         {
             "name": "Christopher Maio",
@@ -14,12 +13,18 @@
         {
             "name": "Taylor Donald Harvey Smith",
             "email": "smit2482@uwm.edu"
+        },
+        {
+            "name": "Jeff Puckett",
+            "email": "jeff@jeffpuckett.com"
         }
     ],
     "require": {
         "php": ">=5.4.0",
         "illuminate/support": "5.*",
-        "mrclay/shibalike": "1.0.0"
+        "mrclay/shibalike": "1.0.0",
+        "laravel/framework": "^5.4",
+        "tymon/jwt-auth": "^0.5.10"
     },
     "autoload": {
         "psr-4": {

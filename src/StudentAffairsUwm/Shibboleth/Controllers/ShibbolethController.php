@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Console\AppNamespaceDetectorTrait;
 use JWTAuth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ShibbolethController extends Controller
 {
@@ -60,10 +61,13 @@ class ShibbolethController extends Controller
     public function create()
     {
         if (config('shibboleth.emulate_idp') == true) {
-            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . "@idpAuthorize"));
-        } else {
-            return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
+                . '?target=' .  action('\\' . __CLASS__ . '@idpAuthorize'));
         }
+
+        return Redirect::to('https://' . Request::server('SERVER_NAME')
+            . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+            . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
     }
 
     /**
@@ -82,8 +86,7 @@ class ShibbolethController extends Controller
         $email    = Input::get(config('shibboleth.local_login_user_field'));
         $password = Input::get(config('shibboleth.local_login_pass_field'));
 
-        $userClass  = config('auth.model');
-        $groupClass = config('auth.group_model');
+        $userClass  = config('auth.providers.users.model');
 
         if (Auth::attempt(array('email' => $email, 'password' => $password, 'type' => 'local'), true)) {
             $user = $userClass::where('email', '=', $email)->first();
@@ -95,10 +98,10 @@ class ShibbolethController extends Controller
             // We need to pass the token... how?
             // Let's try this.
             return $this->viewOrRedirect(config('shibboleth.local_authenticated') . '?token=' . $token);
-        } else {
-            Session::flash('message', 'Invalid email or password.');
-            return $this->viewOrRedirect(config('shibboleth.local_login'));
         }
+
+        Session::flash('message', 'Invalid email or password.');
+        return $this->viewOrRedirect(config('shibboleth.local_login'));
     }
 
     /**
@@ -107,12 +110,12 @@ class ShibbolethController extends Controller
      */
     public function idpAuthorize()
     {
-        $email      = $this->getServerVariable(config('shibboleth.idp_login_email'));
-        $first_name = $this->getServerVariable(config('shibboleth.idp_login_first'));
-        $last_name  = $this->getServerVariable(config('shibboleth.idp_login_last'));
+        $email     = $this->getServerVariable(config('shibboleth.idp_login_email'));
+        $firstName = $this->getServerVariable(config('shibboleth.idp_login_first'));
+        $lastName  = $this->getServerVariable(config('shibboleth.idp_login_last'));
 
-        $userClass  = config('auth.model');
-        $groupClass = config('auth.group_model');
+        $userClass  = config('auth.providers.users.model');
+        $groupClass = config('auth.providers.users.group_model');
 
         // Attempt to login with the email, if success, update the user model
         // with data from the Shibboleth headers (if present)
@@ -121,12 +124,12 @@ class ShibbolethController extends Controller
             $user = $userClass::where('email', '=', $email)->first();
 
             // Update the modal as necessary
-            if (isset($first_name)) {
-                $user->first_name = $first_name;
+            if (isset($firstName)) {
+                $user->first_name = $firstName;
             }
 
-            if (isset($last_name)) {
-                $user->last_name = $last_name;
+            if (isset($lastName)) {
+                $user->last_name = $lastName;
             }
 
             $user->save();
@@ -138,44 +141,39 @@ class ShibbolethController extends Controller
             // We need to pass the token... how?
             // Let's try this.
             return $this->viewOrRedirect(config('shibboleth.shibboleth_authenticated') . '?token=' . $token);
-
-        } else {
-            //Add user to group and send through auth.
-            if (isset($email)) {
-                if (config('shibboleth.add_new_users', true)) {
-                    $user = $userClass::create(array(
-                        'email'      => $email,
-                        'type'       => 'shibboleth',
-                        'first_name' => $first_name,
-                        'last_name'  => $last_name,
-                        'enabled'    => 0,
-                    ));
-
-                    try {
-                        $group = $groupClass::findOrFail(config('shibboleth.shibboleth_group'));
-                    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-                        $msg = "Could not find " . $groupClass . " with primary key " . config('shibboleth.shibboleth_group') . "! Check your Laravel-Shibboleth configuration.";
-                        throw new \RuntimeException($msg, 900, $e);
-                    }
-
-                    $group->users()->save($user);
-
-                    // this is simply brings us back to the session-setting branch directly above
-                    if (config('shibboleth.emulate_idp') == true) {
-                        return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
-                    } else {
-                        return Redirect::to('https://' . Request::server('SERVER_NAME') . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login') . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
-                    }
-                } else {
-                    // TODO: This is old... it will just cause redirect loops.
-                    // Identify that the user was not in our database and will not be created (despite passing IdP)
-                    Session::put('auth_type', 'no_user');
-                    Session::put('group', 'undefined');
-
-                    return $this->viewOrRedirect(config('shibboleth.shibboleth_unauthorized'));
-                }
-            }
         }
+
+        //Add user to group and send through auth.
+        if (isset($email) && config('shibboleth.add_new_users', true)) {
+            $user = $userClass::create(array(
+                'email'      => $email,
+                'type'       => 'shibboleth',
+                'first_name' => $firstName,
+                'last_name'  => $lastName,
+                'enabled'    => 0,
+            ));
+
+            try {
+                $group = $groupClass::findOrFail(config('shibboleth.shibboleth_group'));
+            } catch (ModelNotFoundException $e) {
+                $msg = "Could not find " . $groupClass
+                    . " with primary key " . config('shibboleth.shibboleth_group')
+                    . "! Check your Laravel-Shibboleth configuration.";
+                throw new \RuntimeException($msg, 900, $e);
+            }
+
+            $group->users()->save($user);
+        }
+
+        // this is simply brings us back to the session-setting branch directly above
+        if (config('shibboleth.emulate_idp') == true) {
+            return Redirect::to(action('\\' . __CLASS__ . '@emulateLogin')
+                . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
+        }
+
+        return Redirect::to('https://' . Request::server('SERVER_NAME')
+            . ':' . Request::server('SERVER_PORT') . config('shibboleth.idp_login')
+            . '?target=' . action('\\' . __CLASS__ . '@idpAuthorize'));
     }
 
     /**
@@ -185,7 +183,6 @@ class ShibbolethController extends Controller
     {
         $token = JWTAuth::parseToken();
 
-        $user = JWTAuth::toUser($token);
         $payload = $token->getPayload();
 
         Auth::logout();
@@ -195,12 +192,12 @@ class ShibbolethController extends Controller
         if ($payload->get('auth_type') == 'idp') {
             if (config('shibboleth.emulate_idp') == true) {
                 return Redirect::to(action('\\' . __CLASS__ . '@emulateLogout'));
-            } else {
-                return Redirect::to('https://' . Request::server('SERVER_NAME') . config('shibboleth.idp_logout'));
             }
-        } else {
-            return $this->viewOrRedirect(config('shibboleth.local_logout'));
+
+            return Redirect::to('https://' . Request::server('SERVER_NAME') . config('shibboleth.idp_logout'));
         }
+
+        return $this->viewOrRedirect(config('shibboleth.local_logout'));
     }
 
     /**
@@ -220,7 +217,10 @@ class ShibbolethController extends Controller
     public function emulateLogout()
     {
         $this->sp->logout();
-        die('Goodbye, fair user. <a href="' . $this->getServerVariable('HTTP_REFERER') . '">Return from whence you came</a>!');
+
+        $referer = $this->getServerVariable('HTTP_REFERER');
+
+        die("Goodbye, fair user. <a href='$referer'>Return from whence you came</a>!");
     }
 
     /**
@@ -263,6 +263,7 @@ class ShibbolethController extends Controller
             ->setSavePath(sys_get_temp_dir())
             ->setName('SHIBALIKE_BASIC')
             ->build();
+
         return new \Shibalike\StateManager\UserlandSession($session);
     }
 
@@ -278,11 +279,13 @@ class ShibbolethController extends Controller
         if (config('shibboleth.emulate_idp') == true) {
             return isset($_SERVER[$variableName]) ?
                 $_SERVER[$variableName] : null;
-        } else {
-            return (!empty(Request::server($variableName))) ?
-                Request::server($variableName) :
-                Request::server('REDIRECT_' . $variableName);
         }
+
+        $variable = Request::server($variableName);
+
+        return (!empty($variable)) ?
+            $variable :
+            Request::server('REDIRECT_' . $variableName);
     }
 
     /*
